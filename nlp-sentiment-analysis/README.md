@@ -60,6 +60,9 @@ Top predictive words found:
 nlp-sentiment-analysis/
 ├── README.md                           ← This file
 ├── sentiment_analysis.ipynb            ← Full analysis notebook
+├── sentiment_analysis_executed.ipynb   ← Executed notebook with outputs
+├── app.py                              ← Streamlit interactive dashboard
+├── create_notebook.py                  ← Notebook generator script
 ├── requirements.txt                    ← Python dependencies
 ├── data/                               ← Dataset (downloaded by notebook)
 ├── outputs/                            ← Generated files
@@ -84,9 +87,12 @@ pip install -r requirements.txt
 
 # Run the notebook
 jupyter notebook sentiment_analysis.ipynb
+
+# Or launch the interactive Streamlit dashboard
+streamlit run app.py
 ```
 
-All cells are self-contained — the dataset downloads automatically from HuggingFace on first run.
+All notebooks cells are self-contained — the dataset downloads automatically from HuggingFace on first run.
 
 ## 📈 Key Insights
 

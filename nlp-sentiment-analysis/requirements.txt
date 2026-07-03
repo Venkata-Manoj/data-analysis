@@ -21,3 +21,6 @@ datasets>=3.0
 # Jupyter
 jupyter>=1.0
 nbformat>=5.9
+
+# Dashboard
+streamlit>=1.35
