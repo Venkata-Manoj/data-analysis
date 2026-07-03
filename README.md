@@ -40,6 +40,20 @@ Collection of data analysis and machine learning projects. Each project lives in
 | Multinomial Naive Bayes | ~85% | ~0.85 | ~0.93 |
 | Random Forest | ~84% | ~0.84 | ~0.92 |
 
+### 📸 Visual Gallery
+
+| Confusion Matrices | Review Length Distribution |
+|:---:|:---:|
+| ![Confusion matrices](nlp-sentiment-analysis/outputs/confusion_matrices.png) | ![Review length distribution](nlp-sentiment-analysis/outputs/review_length_distribution.png) |
+
+| Positive Reviews Word Cloud | Negative Reviews Word Cloud |
+|:---:|:---:|
+| ![Positive reviews word cloud](nlp-sentiment-analysis/outputs/wordcloud_positive.png) | ![Negative reviews word cloud](nlp-sentiment-analysis/outputs/wordcloud_negative.png) |
+
+**Top Predictive Features:**
+
+![Top predictive features](nlp-sentiment-analysis/outputs/top_features.png)
+
 ---
 
 ## 🚀 Quick Start
