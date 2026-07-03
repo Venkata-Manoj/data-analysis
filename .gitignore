@@ -1,1 +1,11 @@
-venv
+# Global ignores
+venv/
+.venv/
+__pycache__/
+*.pyc
+.env
+
+# Project-specific generated outputs
+**/outputs/
+**/data/
+**/.ipynb_checkpoints/

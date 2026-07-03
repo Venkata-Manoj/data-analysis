@@ -1,35 +1,35 @@
 # 📊 Data Analysis Portfolio
 
-Collection of data analysis and machine learning projects. Each project lives in its own subdirectory under `projects/` with a complete pipeline, visualizations, and documented results.
+Collection of data analysis and machine learning projects. Each project lives in its own top-level directory with a complete pipeline, visualizations, and documented results.
 
 ---
 
 ## 📂 Projects
 
-### Project 1: Customer Segmentation (RFM Clustering)
+### Project 1: 📊 Customer Segmentation (RFM Clustering)
 
-**Directory:** [`projects/customer-rfm-segmentation`](projects/customer-rfm-segmentation/) *(coming soon)*
+**Directory:** [`customer-rfm-segmentation/`](customer-rfm-segmentation/)
 
-→ Interactive Streamlit dashboard for exploring customer segments using **RFM (Recency, Frequency, Monetary)** clustering and KMeans.
+→ Interactive Streamlit dashboard exploring customer segments using **RFM (Recency, Frequency, Monetary)** clustering with KMeans.
 
 | Detail | Value |
 |--------|-------|
 | Technique | KMeans clustering, RFM scoring |
 | Dataset | UCI Online Retail |
 | Tools | Python, Pandas, Scikit-learn, Streamlit, Plotly |
-| Status | ✅ See `app.py`, `segmentation.ipynb`, `rfm_segments.csv` (root level) |
+| Status | ✅ Complete |
 
-### Project 2: NLP Sentiment Analysis — IMDB Reviews 🆕
+### Project 2: 🎬 NLP Sentiment Analysis — IMDB Reviews
 
-**Directory:** [`projects/nlp-sentiment-analysis`](projects/nlp-sentiment-analysis/)
+**Directory:** [`nlp-sentiment-analysis/`](nlp-sentiment-analysis/)
 
-→ End-to-end NLP pipeline that classifies IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers.
+→ End-to-end NLP pipeline classifying IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers.
 
 | Detail | Value |
 |--------|-------|
 | Technique | TF-IDF vectorization, Logistic Regression, Naive Bayes, Random Forest |
 | Dataset | Stanford IMDB Large Movie Review Dataset (50k reviews) |
-| Tools | Hugging Face Datasets, Scikit-learn, NLTK, Matplotlib, WordCloud, Plotly |
+| Tools | Hugging Face Datasets, Scikit-learn, NLTK, WordCloud, Plotly |
 | Status | ✅ Complete |
 
 **Results:**
@@ -50,11 +50,12 @@ git clone https://github.com/Venkata-Manoj/data-analysis.git
 cd data-analysis
 
 # Project 1: Customer Segmentation
+cd customer-rfm-segmentation
 pip install -r requirements.txt
 streamlit run app.py
 
 # Project 2: NLP Sentiment Analysis
-cd projects/nlp-sentiment-analysis
+cd nlp-sentiment-analysis
 pip install -r requirements.txt
 jupyter notebook sentiment_analysis.ipynb
 ```
