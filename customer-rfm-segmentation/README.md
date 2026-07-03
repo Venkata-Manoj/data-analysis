@@ -1,39 +1,12 @@
-# 📊 Customer Segmentation Dashboard (RFM Clustering)
+# Customer Segmentation with RFM Clustering
 
-**Project 1** of the Data Analysis Portfolio — an interactive dashboard for exploring customer segments generated via **RFM (Recency, Frequency, Monetary)** clustering.
+Project 1 of the Data Analysis Portfolio. An interactive dashboard that groups customers into meaningful segments based on their buying behaviour. Built with Streamlit and Plotly.
 
-## 🧠 What it does
+## What This Does
 
-Customer segmentation using KMeans clustering on the **UCI Online Retail** dataset. The pipeline computes R, F, and M scores for each customer, clusters them with KMeans, then serves results via an interactive Streamlit dashboard.
+Understand who your customers really are. This project takes transactional data and breaks customers into groups like "Champions" (your best, most loyal customers), "At Risk" (high spenders who haven't bought lately), and "Lost" (inactive for a while). Each segment gets its own profile with KPIs, charts, and actionable insights.
 
-## 📂 Project Files
-
-| File | Purpose |
-|---|---|
-| `app.py` | Streamlit dashboard — filters, KPIs, Plotly charts |
-| `rfm_segments.csv` | Precomputed RFM dataset with cluster assignments |
-| `segmentation.ipynb` | Notebook: feature engineering + KMeans training + CSV export |
-| `requirements.txt` | Python dependencies |
-| `outputs/` | Generated charts and artifacts *(gitignored)* |
-
-## 🔬 Pipeline
-
-```
-Load Data → Compute RFM → Cap Outliers → Standardize → KMeans → Export CSV → Streamlit Dashboard
-```
-
-1. **Load** the UCI Online Retail dataset
-2. **Compute** per-customer:
-   - **Recency**: days since last purchase
-   - **Frequency**: number of unique invoices
-   - **Monetary**: total spend
-3. **Cap** outliers (99th percentile)
-4. **Standardize** features
-5. **Train KMeans** (k=4)
-6. **Export** results to `rfm_segments.csv`
-7. **Serve** via Streamlit dashboard
-
-## 🚀 How to Run
+## How to Run
 
 ```bash
 cd customer-rfm-segmentation
@@ -41,26 +14,35 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-Then open `http://localhost:8501`
+## Project Structure
 
-## 📈 Dashboard Features
+```
+customer-rfm-segmentation/
+├── README.md                <- This file
+├── app.py                   <- Streamlit dashboard with filters, KPIs, and Plotly charts
+├── requirements.txt         <- Python dependencies
+└── data/                    <- Dataset files
+    └── online_retail.xlsx   <- UCI Online Retail dataset
+```
 
-- **Sidebar filters**: Segment, Recency range, Monetary range
-- **Visuals** (Plotly):
-  - Segment distribution (pie chart)
-  - RFM 3D scatter (Recency × Frequency × Monetary)
-  - Average RFM per segment (grouped bar chart)
-- **Data table**: preview filtered results
+## Features
 
-## 🏷️ Segment Labels
+- RFM scoring (Recency, Frequency, Monetary) for each customer
+- KMeans clustering to group customers into 4 segments
+- Interactive filters by segment, purchase history, and spend range
+- KPI cards with segment-level metrics
+- Distribution charts and comparison views
+- Download filtered results as CSV
 
-| Cluster | Label | Description |
+## Customer Segments Found
+
+| Segment | Label | Description |
 |---------|-------|-------------|
-| 0 | 🏆 Champions | Top customers — recent, frequent, high spend |
-| 1 | ❌ Lost | Inactive customers — low recency |
-| 2 | 🌱 New/Promising | Recent but low frequency/spend |
-| 3 | ⚠️ At Risk — Big Spenders | High spend but dropping recency |
+| 0 | Champions | Top customers. Recent, frequent, high spend. |
+| 1 | Lost | Inactive customers. Low recency scores. |
+| 2 | Loyal Customers | Regular buyers who spend consistently. |
+| 3 | At Risk - Big Spenders | High spend but dropping recency. Worth re-engaging. |
 
-## 📝 License
+## License
 
-MIT
+MIT - feel free to use, modify, and share.

@@ -219,7 +219,7 @@ with tab_live:
         ),
     )
 
-    if st.button("🔍 Analyze Sentiment", type="primary", width="stretch"):
+    if st.button("🔍 Analyze Sentiment", type="primary", use_container_width=True):
         if not review_input.strip():
             st.warning("Please enter a review to analyze.")
         else:

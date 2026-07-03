@@ -1,36 +1,36 @@
-# 📊 Data Analysis Portfolio
+# Data Analysis Portfolio
 
-Collection of data analysis and machine learning projects. Each project lives in its own top-level directory with a complete pipeline, visualizations, and documented results.
+A collection of hands-on data analysis and machine learning projects I built to explore real-world datasets and solve practical problems. Each project is a complete story, from raw data to insights.
 
 ---
 
-## 📂 Projects
+## Projects
 
-### Project 1: 📊 Customer Segmentation (RFM Clustering)
+### Project 1: Customer Segmentation (RFM Clustering)
 
 **Directory:** [`customer-rfm-segmentation/`](customer-rfm-segmentation/)
 
-→ Interactive Streamlit dashboard exploring customer segments using **RFM (Recency, Frequency, Monetary)** clustering with KMeans.
+An interactive Streamlit dashboard that groups customers into segments based on how recently they bought, how often they buy, and how much they spend. Helps businesses identify their best customers, re-engage at-risk ones, and understand what's happening with their base at a glance.
 
 | Detail | Value |
 |--------|-------|
 | Technique | KMeans clustering, RFM scoring |
 | Dataset | UCI Online Retail |
 | Tools | Python, Pandas, Scikit-learn, Streamlit, Plotly |
-| Status | ✅ Complete |
+| Status | Complete |
 
-### Project 2: 🎬 NLP Sentiment Analysis — IMDB Reviews
+### Project 2: NLP Sentiment Analysis - IMDB Reviews
 
 **Directory:** [`nlp-sentiment-analysis/`](nlp-sentiment-analysis/)
 
-→ End-to-end NLP pipeline classifying IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers. Includes an **interactive Streamlit dashboard** (run `streamlit run app.py` to launch locally).
+A complete NLP pipeline that reads movie reviews and tells you whether they're positive or negative. I trained and compared three classifiers, then picked the best one. You can test it yourself through the interactive Streamlit dashboard (run `streamlit run app.py` to launch locally).
 
 | Detail | Value |
 |--------|-------|
 | Technique | TF-IDF vectorization, Logistic Regression, Naive Bayes, Random Forest |
 | Dataset | Stanford IMDB Large Movie Review Dataset (50k reviews) |
 | Tools | Hugging Face Datasets, Scikit-learn, NLTK, WordCloud, Plotly |
-| Status | ✅ Complete |
+| Status | Complete |
 
 **Results:**
 
@@ -40,7 +40,7 @@ Collection of data analysis and machine learning projects. Each project lives in
 | Multinomial Naive Bayes | ~85% | ~0.85 | ~0.93 |
 | Random Forest | ~84% | ~0.84 | ~0.92 |
 
-### 📸 Visual Gallery
+### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
 |:---:|:---:|
@@ -56,7 +56,7 @@ Collection of data analysis and machine learning projects. Each project lives in
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
 # Clone the repo
@@ -76,7 +76,7 @@ jupyter notebook sentiment_analysis.ipynb
 streamlit run app.py
 ```
 
-## 🛠️ Tech Stack
+## Tech Stack
 
 - **Languages:** Python 3.11+
 - **Data:** Pandas, NumPy
@@ -85,6 +85,6 @@ streamlit run app.py
 - **Notebooks:** Jupyter
 - **Datasets:** Hugging Face Datasets, UCI Repository
 
-## 📝 License
+## License
 
-MIT — feel free to use, modify, and share.
+MIT - feel free to use, modify, and share.

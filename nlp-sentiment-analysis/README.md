@@ -1,23 +1,23 @@
-# 🎬 NLP Sentiment Analysis — IMDB Movie Reviews
+# NLP Sentiment Analysis - IMDB Movie Reviews
 
-**Project 2** of the Data Analysis Portfolio — a complete end-to-end NLP pipeline that classifies movie reviews as positive or negative.
+Project 2 of the Data Analysis Portfolio. This is a complete NLP pipeline that reads a movie review and tells you whether it's positive or negative. I trained three classifiers and picked the best one.
 
-## 📊 Dataset
+## The Dataset
 
 **Stanford IMDB Large Movie Review Dataset** ([HuggingFace](https://huggingface.co/datasets/stanfordnlp/imdb))
 
-- **50,000** highly polarised reviews (25k train / 25k test)
+- 50,000 highly polarised reviews (25k train / 25k test)
 - Balanced 50/50 between positive and negative classes
 - Real-world text with HTML tags, varied vocabulary, and natural language patterns
 
-## 🔬 Pipeline
+## How It Works
 
 ```
-Raw Text → Clean & Preprocess → TF-IDF Vectorization → Train Classifiers → Evaluate & Compare
+Raw Text -> Clean & Preprocess -> TF-IDF Vectorization -> Train Classifiers -> Evaluate & Compare
 ```
 
 ### Step 1: Exploratory Data Analysis
-- Review length distribution (median ~800 chars)
+- Review length distribution (median around 800 chars)
 - Word clouds for positive vs negative reviews
 - No significant class imbalance
 
@@ -44,42 +44,42 @@ Three classifiers trained and compared:
 
 ### Step 5: Results
 
-**Logistic Regression** is the best model — it offers:
+**Logistic Regression** is the winner. Here's why:
 - **Highest accuracy** (~89%)
 - **Fast training** (seconds on 25k samples)
-- **Excellent interpretability** (coefficients show feature importance)
-- **Strong ROC-AUC** (~0.95) shows excellent class separation
+- **Easy to interpret** (coefficients show which words matter most)
+- **Strong ROC-AUC** (~0.95) means it separates positive from negative reviews really well
 
 Top predictive words found:
-- ✅ Positive: *excel, amaz, wonder, perfect, great, love, best, fantastic*
-- ❌ Negative: *worst, aw, boring, terrible, bad, disappoint, horrible, waste*
+- Positive: *excel, amaz, wonder, perfect, great, love, best, fantastic*
+- Negative: *worst, aw, boring, terrible, bad, disappoint, horrible, waste*
 
-## 🗂️ Project Structure
+## Project Structure
 
 ```
 nlp-sentiment-analysis/
-├── README.md                           ← This file
-├── sentiment_analysis.ipynb            ← Full analysis notebook
-├── sentiment_analysis_executed.ipynb   ← Executed notebook with outputs
-├── app.py                              ← Streamlit interactive dashboard
-├── create_notebook.py                  ← Notebook generator script
-├── requirements.txt                    ← Python dependencies
-├── data/                               ← Dataset (downloaded by notebook)
-├── outputs/                            ← Generated files
-│   ├── best_model.pkl                  ← Trained Logistic Regression model
-│   ├── tfidf_vectorizer.pkl            ← TF-IDF vectorizer
-│   ├── model_comparison.html           ← Interactive Plotly comparison chart
-│   ├── metrics.json                    ← Model performance metrics
-│   ├── predictions.csv                 ← Test set predictions with probabilities
-│   ├── review_length_distribution.png  ← EDA chart
-│   ├── wordcloud_positive.png          ← Positive review word cloud
-│   ├── wordcloud_negative.png          ← Negative review word cloud
-│   ├── confusion_matrices.png          ← Confusion matrices for all models
-│   └── top_features.png                ← Most important words per class
-└── create_notebook.py                  ← Notebook generator script
+├── README.md                           <- This file
+├── sentiment_analysis.ipynb            <- Full analysis notebook
+├── sentiment_analysis_executed.ipynb   <- Executed notebook with outputs
+├── app.py                              <- Streamlit interactive dashboard
+├── create_notebook.py                  <- Notebook generator script
+├── requirements.txt                    <- Python dependencies
+├── data/                               <- Dataset (downloaded by notebook)
+├── outputs/                            <- Generated files
+│   ├── best_model.pkl                  <- Trained Logistic Regression model
+│   ├── tfidf_vectorizer.pkl            <- TF-IDF vectorizer
+│   ├── model_comparison.html           <- Interactive Plotly comparison chart
+│   ├── metrics.json                    <- Model performance metrics
+│   ├── predictions.csv                 <- Test set predictions with probabilities
+│   ├── review_length_distribution.png  <- EDA chart
+│   ├── wordcloud_positive.png          <- Positive review word cloud
+│   ├── wordcloud_negative.png          <- Negative review word cloud
+│   ├── confusion_matrices.png          <- Confusion matrices for all models
+│   └── top_features.png                <- Most important words per class
+└── create_notebook.py                  <- Notebook generator script
 ```
 
-## 🚀 How to Run
+## How to Run
 
 ```bash
 # Install dependencies
@@ -92,16 +92,16 @@ jupyter notebook sentiment_analysis.ipynb
 streamlit run app.py
 ```
 
-All notebooks cells are self-contained — the dataset downloads automatically from HuggingFace on first run.
+All notebook cells are self-contained. The dataset downloads automatically from HuggingFace on first run.
 
-## 📈 Key Insights
+## Key Takeaways
 
-1. **TF-IDF + Logistic Regression** is a strong baseline for text classification — simple, fast, and interpretable
-2. **N-grams** (unigrams + bigrams) capture both individual words and common two-word phrases
-3. **Stop word removal + stemming** reduces vocabulary noise without losing signal
-4. **Review length** has little correlation with sentiment — both short and long reviews span the full polarity spectrum
+1. **TF-IDF + Logistic Regression** is a strong baseline for text classification. Simple, fast, and interpretable.
+2. **N-grams** (unigrams + bigrams) capture both individual words and common two-word phrases.
+3. **Stop word removal + stemming** reduces vocabulary noise without losing signal.
+4. **Review length** has little correlation with sentiment. Both short and long reviews span the full polarity spectrum.
 
-## 🔮 Future Improvements
+## Future Improvements
 
 - Try deep learning (LSTM, Transformer) for higher accuracy
 - Use pre-trained embeddings (GloVe, BERT) instead of TF-IDF
@@ -109,6 +109,6 @@ All notebooks cells are self-contained — the dataset downloads automatically f
 - Add cross-validation for more robust evaluation
 - Extend to multi-class sentiment (very positive, neutral, very negative)
 
-## 📝 License
+## License
 
-MIT — feel free to use, modify, and share.
+MIT - feel free to use, modify, and share.
