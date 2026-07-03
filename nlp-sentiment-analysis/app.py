@@ -117,12 +117,12 @@ with tab_dash:
         st.subheader("Confusion Matrices")
         cm_path = OUTPUTS / "confusion_matrices.png"
         if cm_path.exists():
-            st.image(str(cm_path), use_container_width=True)
+            st.image(str(cm_path), width="stretch")
     with col_rl:
         st.subheader("Review Length Distribution")
         rl_path = OUTPUTS / "review_length_distribution.png"
         if rl_path.exists():
-            st.image(str(rl_path), use_container_width=True)
+            st.image(str(rl_path), width="stretch")
 
     # ── Word clouds ───────────────────────────────────────────────────────
     st.subheader("Word Clouds")
@@ -130,17 +130,17 @@ with tab_dash:
     with wc1:
         wc_pos = OUTPUTS / "wordcloud_positive.png"
         if wc_pos.exists():
-            st.image(str(wc_pos), caption="Positive Reviews", use_container_width=True)
+            st.image(str(wc_pos), caption="Positive Reviews", width="stretch")
     with wc2:
         wc_neg = OUTPUTS / "wordcloud_negative.png"
         if wc_neg.exists():
-            st.image(str(wc_neg), caption="Negative Reviews", use_container_width=True)
+            st.image(str(wc_neg), caption="Negative Reviews", width="stretch")
 
     # ── Top features ──────────────────────────────────────────────────────
     st.subheader("Top Predictive Features")
     feat_path = OUTPUTS / "top_features.png"
     if feat_path.exists():
-        st.image(str(feat_path), use_container_width=True)
+        st.image(str(feat_path), width="stretch")
 
     st.divider()
 
@@ -196,7 +196,7 @@ with tab_dash:
             "confidence": "Confidence",
         },
         height=400,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
     )
 
@@ -219,7 +219,7 @@ with tab_live:
         ),
     )
 
-    if st.button("🔍 Analyze Sentiment", type="primary", use_container_width=True):
+    if st.button("🔍 Analyze Sentiment", type="primary", width="stretch"):
         if not review_input.strip():
             st.warning("Please enter a review to analyze.")
         else:
@@ -259,7 +259,7 @@ with tab_live:
                     "Probability": [f"{pos_prob:.1%}", f"{neg_prob:.1%}"],
                 }
             )
-            st.dataframe(prob_df, hide_index=True, use_container_width=True)
+            st.dataframe(prob_df, hide_index=True, width="stretch")
 
             # ── Show the cleaned text ─────────────────────────────────────
             with st.expander("🔧 See preprocessed text (after cleaning & stemming)"):

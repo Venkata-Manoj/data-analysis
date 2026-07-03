@@ -23,7 +23,7 @@ Collection of data analysis and machine learning projects. Each project lives in
 
 **Directory:** [`nlp-sentiment-analysis/`](nlp-sentiment-analysis/)
 
-→ End-to-end NLP pipeline classifying IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers. Includes an **interactive Streamlit dashboard** ([live demo](https://anyone-attribute-handled-ventures.trycloudflare.com)).
+→ End-to-end NLP pipeline classifying IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers. Includes an **interactive Streamlit dashboard** (run `streamlit run app.py` to launch locally).
 
 | Detail | Value |
 |--------|-------|
