@@ -71,7 +71,7 @@ streamlit run app.py
 # Project 2: NLP Sentiment Analysis
 cd nlp-sentiment-analysis
 pip install -r requirements.txt
-jupyter notebook sentiment_analysis.ipynb
+jupyter notebook sentiment_analysis_executed.ipynb
 # Or launch the interactive dashboard:
 streamlit run app.py
 ```

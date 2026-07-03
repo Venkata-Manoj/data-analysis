@@ -1,8 +1,9 @@
-# Generated outputs
-outputs/
+# Generated outputs (track PNGs for README gallery)
+outputs/*
 *.pkl
 *.csv
 *.html
+!outputs/*.png
 
 # Dataset cache
 data/

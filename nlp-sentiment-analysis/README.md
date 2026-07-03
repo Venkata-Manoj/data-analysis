@@ -59,8 +59,7 @@ Top predictive words found:
 ```
 nlp-sentiment-analysis/
 ├── README.md                           <- This file
-├── sentiment_analysis.ipynb            <- Full analysis notebook (clean)
-├── sentiment_analysis_executed.ipynb   <- Executed notebook with outputs
+├── sentiment_analysis_executed.ipynb   <- Full notebook with all outputs
 ├── app.py                              <- Streamlit interactive dashboard
 ├── requirements.txt                    <- Python dependencies
 ├── data/                               <- Dataset (downloaded by notebook)
@@ -84,7 +83,7 @@ nlp-sentiment-analysis/
 pip install -r requirements.txt
 
 # Run the notebook
-jupyter notebook sentiment_analysis.ipynb
+jupyter notebook sentiment_analysis_executed.ipynb
 
 # Or launch the interactive Streamlit dashboard
 streamlit run app.py
