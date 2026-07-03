@@ -1,54 +1,73 @@
-# Customer Segmentation Dashboard (RFM Clustering)
+# 📊 Data Analysis Portfolio
 
-Interactive Streamlit dashboard for exploring customer segments generated using **RFM (Recency, Frequency, Monetary)** clustering.
+Collection of data analysis and machine learning projects. Each project lives in its own subdirectory under `projects/` with a complete pipeline, visualizations, and documented results.
 
-## What this project contains
-- **`app.py`**: Streamlit web app (filters + KPIs + Plotly charts)
-- **`rfm_segments.csv`**: Precomputed RFM dataset with cluster assignments
-- **`segmentation.ipynb`**: Notebook used to build the RFM features and train KMeans (and export the CSV)
-- **`requirements.txt`**: Python dependencies
+---
 
-## How the segmentation works
-1. Load the Online Retail dataset in the notebook.
-2. Compute customer-level:
-   - **Recency**: days since last purchase
-   - **Frequency**: number of unique invoices
-   - **Monetary**: total spend
-3. Cap outliers and standardize features.
-4. Train **KMeans** (default `k=4` in the notebook).
-5. Export the resulting table to **`rfm_segments.csv`** with columns:
-   - `CustomerID, Recency, Frequency, Monetary, Cluster`
+## 📂 Projects
 
-## Running the dashboard
-### 1) Install dependencies
+### Project 1: Customer Segmentation (RFM Clustering)
+
+**Directory:** [`projects/customer-rfm-segmentation`](projects/customer-rfm-segmentation/) *(coming soon)*
+
+→ Interactive Streamlit dashboard for exploring customer segments using **RFM (Recency, Frequency, Monetary)** clustering and KMeans.
+
+| Detail | Value |
+|--------|-------|
+| Technique | KMeans clustering, RFM scoring |
+| Dataset | UCI Online Retail |
+| Tools | Python, Pandas, Scikit-learn, Streamlit, Plotly |
+| Status | ✅ See `app.py`, `segmentation.ipynb`, `rfm_segments.csv` (root level) |
+
+### Project 2: NLP Sentiment Analysis — IMDB Reviews 🆕
+
+**Directory:** [`projects/nlp-sentiment-analysis`](projects/nlp-sentiment-analysis/)
+
+→ End-to-end NLP pipeline that classifies IMDB movie reviews as positive or negative using TF-IDF and multiple classifiers.
+
+| Detail | Value |
+|--------|-------|
+| Technique | TF-IDF vectorization, Logistic Regression, Naive Bayes, Random Forest |
+| Dataset | Stanford IMDB Large Movie Review Dataset (50k reviews) |
+| Tools | Hugging Face Datasets, Scikit-learn, NLTK, Matplotlib, WordCloud, Plotly |
+| Status | ✅ Complete |
+
+**Results:**
+
+| Model | Accuracy | F1 Score | ROC-AUC |
+|-------|----------|----------|---------|
+| **Logistic Regression** | **88.1%** | **0.882** | **0.953** |
+| Multinomial Naive Bayes | ~85% | ~0.85 | ~0.93 |
+| Random Forest | ~84% | ~0.84 | ~0.92 |
+
+---
+
+## 🚀 Quick Start
+
 ```bash
+# Clone the repo
+git clone https://github.com/Venkata-Manoj/data-analysis.git
+cd data-analysis
+
+# Project 1: Customer Segmentation
 pip install -r requirements.txt
-```
-
-### 2) Start Streamlit
-```bash
 streamlit run app.py
+
+# Project 2: NLP Sentiment Analysis
+cd projects/nlp-sentiment-analysis
+pip install -r requirements.txt
+jupyter notebook sentiment_analysis.ipynb
 ```
 
-Then open:
-- `http://localhost:8501`
+## 🛠️ Tech Stack
 
-## Dashboard features
-- Sidebar filters:
-  - Segment (mapped from cluster id)
-  - Recency range
-  - Monetary range
-- Visuals (Plotly):
-  - Segment distribution (pie)
-  - RFM 3D scatter (Recency vs Frequency vs Monetary)
-  - Average RFM per segment (grouped bar)
-- Data preview table for the filtered results
+- **Languages:** Python 3.11+
+- **Data:** Pandas, NumPy
+- **ML:** Scikit-learn, NLTK
+- **Visualisation:** Matplotlib, Seaborn, Plotly, WordCloud
+- **Notebooks:** Jupyter
+- **Datasets:** Hugging Face Datasets, UCI Repository
 
-## Notes
-- The app uses `st.cache_data` to avoid reloading `rfm_segments.csv` on each interaction.
-- Cluster names are defined in `app.py`:
-  - `0: Champions`
-  - `1: Lost`
-  - `2: New/Promising`
-  - `3: At Risk – Big Spenders`
+## 📝 License
 
+MIT — feel free to use, modify, and share.

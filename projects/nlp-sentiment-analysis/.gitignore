@@ -1,0 +1,15 @@
+# Generated outputs
+outputs/
+*.pkl
+*.csv
+*.html
+
+# Dataset cache
+data/
+
+# Jupyter checkpoints
+.ipynb_checkpoints/
+
+# Virtual environment
+venv/
+.venv/
