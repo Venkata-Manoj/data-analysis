@@ -40,6 +40,30 @@ A complete NLP pipeline that reads movie reviews and tells you whether they're p
 | Multinomial Naive Bayes | ~85% | ~0.85 | ~0.93 |
 | Random Forest | ~84% | ~0.84 | ~0.92 |
 
+### Project 3: House Price Prediction — California Housing
+
+**Directory:** [`house-price-prediction/`](house-price-prediction/)
+
+A complete regression pipeline that predicts median house values across California census block groups. Five models compared (Linear Regression, Ridge, Lasso, Random Forest, Gradient Boosting), with the tuned Gradient Boosting achieving **R² = 0.836** and a typical prediction error of **~$10,707**. Includes feature engineering, geospatial EDA, residual analysis, and learning curves.
+
+| Detail | Value |
+|--------|-------|
+| Technique | Gradient Boosting, Random Forest, Ridge/Lasso, feature engineering |
+| Dataset | California Housing (sklearn) — 20,640 block groups |
+| Tools | Scikit-learn, Pandas, Matplotlib, Seaborn |
+| Status | Complete |
+
+**Results:**
+
+| Model | R² Score | MAE (log) | RMSE (log) |
+|-------|----------|-----------|------------|
+| **Gradient Boosting (tuned)** | **0.8363** | **0.1017** | **0.1436** |
+| Random Forest (50) | 0.8149 | 0.1073 | 0.1527 |
+| Ridge (alpha=1.0) | 0.6721 | 0.1525 | 0.2033 |
+| Linear Regression | 0.6721 | 0.1525 | 0.2033 |
+
+| Key finding | The engineered `IncomePerRoom` feature dominates (43.8% importance) — neighborhood affluence density predicts price better than income alone. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -83,7 +107,7 @@ streamlit run app.py
 - **ML:** Scikit-learn, NLTK
 - **Visualisation:** Matplotlib, Seaborn, Plotly, WordCloud
 - **Notebooks:** Jupyter
-- **Datasets:** Hugging Face Datasets, UCI Repository
+- **Datasets:** Hugging Face Datasets, UCI Repository, sklearn datasets
 
 ## License
 
