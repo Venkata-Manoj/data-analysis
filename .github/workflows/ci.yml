@@ -1,0 +1,91 @@
+name: CI
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+    branches: [master, main]
+
+jobs:
+  lint:
+    name: Lint & Format
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.11"]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install ruff
+
+      - name: Lint with ruff
+        run: ruff check
+
+      - name: Format check with ruff
+        run: ruff format --check
+
+  validate:
+    name: Validate project structure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Check project directories
+        run: |
+          for project in customer-rfm-segmentation nlp-sentiment-analysis house-price-prediction; do
+            if [ -d "$project" ]; then
+              echo "✅ $project directory exists"
+            else
+              echo "❌ $project directory is missing"
+              exit 1
+            fi
+          done
+
+      - name: Check key files exist
+        run: |
+          errors=0
+          for file in README.md pyproject.toml; do
+            if [ -f "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ $file is missing"
+              errors=$((errors + 1))
+            fi
+          done
+          for file in customer-rfm-segmentation/app.py customer-rfm-segmentation/README.md \
+                       nlp-sentiment-analysis/app.py nlp-sentiment-analysis/README.md \
+                       house-price-prediction/analysis.py house-price-prediction/README.md; do
+            if [ -f "$file" ]; then
+              echo "✅ $file exists"
+            else
+              echo "❌ $file is missing"
+              errors=$((errors + 1))
+            fi
+          done
+          exit $errors
+
+      - name: Check Python syntax
+        run: |
+          errors=0
+          for pyfile in customer-rfm-segmentation/app.py nlp-sentiment-analysis/app.py house-price-prediction/analysis.py; do
+            if python -c "compile(open('$pyfile').read(), '$pyfile', 'exec')" 2>/dev/null; then
+              echo "✅ $pyfile — valid syntax"
+            else
+              echo "❌ $pyfile — syntax error"
+              errors=$((errors + 1))
+            fi
+          done
+          exit $errors

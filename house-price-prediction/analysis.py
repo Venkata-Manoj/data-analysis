@@ -9,26 +9,25 @@
 # Skills demonstrated: regression, feature engineering, cross-validation,
 # ensemble methods, geospatial analysis, model interpretation.
 
+import matplotlib
 import numpy as np
 import pandas as pd
-import matplotlib
+
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import seaborn as sns
-import os, json, warnings
+import json
+import os
+import warnings
 from datetime import datetime
 
+import matplotlib.pyplot as plt
+import seaborn as sns
 from sklearn.datasets import fetch_california_housing
-from sklearn.model_selection import (
-    train_test_split, cross_val_score, GridSearchCV, KFold
-)
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LinearRegression, Ridge, Lasso
-from sklearn.ensemble import RandomForestRegressor, GradientBoostingRegressor
-from sklearn.metrics import (
-    mean_squared_error, mean_absolute_error, r2_score
-)
+from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
 from sklearn.inspection import permutation_importance
+from sklearn.linear_model import Lasso, LinearRegression, Ridge
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+from sklearn.model_selection import GridSearchCV, KFold, cross_val_score, train_test_split
+from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore")
 sns.set_theme(style="whitegrid", palette="muted")
@@ -55,17 +54,20 @@ df["LogMedHouseVal"] = np.log1p(df["MedHouseVal"])  # log-transform target
 print(f"  Samples: {df.shape[0]:,}")
 print(f"  Features: {df.shape[1] - 2}")
 print(f"  Missing values: {df.isnull().sum().sum()}")
-print(f"\n  Feature descriptions:")
-for name, desc in zip(housing.feature_names, [
-    "Median income in block group (scaled)",
-    "Median house age in block group",
-    "Average rooms per household",
-    "Average bedrooms per household",
-    "Block group population",
-    "Average household occupancy",
-    "Block group latitude",
-    "Block group longitude",
-]):
+print("\n  Feature descriptions:")
+for name, desc in zip(
+    housing.feature_names,
+    [
+        "Median income in block group (scaled)",
+        "Median house age in block group",
+        "Average rooms per household",
+        "Average bedrooms per household",
+        "Block group population",
+        "Average household occupancy",
+        "Block group latitude",
+        "Block group longitude",
+    ],
+):
     print(f"    {name:15s} — {desc}")
 
 df.info()
@@ -93,8 +95,7 @@ print("  ✓ Feature distributions chart saved")
 # Correlation matrix
 corr = df[list(housing.feature_names) + ["MedHouseVal"]].corr()
 plt.figure(figsize=(10, 8))
-sns.heatmap(corr, annot=True, fmt=".2f", cmap="RdBu_r", center=0,
-            square=True, linewidths=0.5)
+sns.heatmap(corr, annot=True, fmt=".2f", cmap="RdBu_r", center=0, square=True, linewidths=0.5)
 plt.title("Feature Correlation Matrix", fontsize=14)
 plt.tight_layout()
 plt.savefig(os.path.join(CHARTS, "correlation_heatmap.png"), dpi=150, bbox_inches="tight")
@@ -119,8 +120,7 @@ print("  ✓ Target distribution chart saved")
 # Geospatial scatter
 plt.figure(figsize=(10, 8))
 sc = plt.scatter(
-    df["Longitude"], df["Latitude"], c=df["MedHouseVal"],
-    cmap="viridis", alpha=0.4, s=5, edgecolors="none"
+    df["Longitude"], df["Latitude"], c=df["MedHouseVal"], cmap="viridis", alpha=0.4, s=5, edgecolors="none"
 )
 plt.colorbar(sc, label="Median House Value ($100k)")
 plt.xlabel("Longitude")
@@ -168,20 +168,21 @@ print(f"  Feature matrix: {df.shape[1]} total features")
 
 print("\n[4] Preparing train/test split...")
 
-feature_cols = (
-    list(housing.feature_names)
-    + ["RoomsPerPerson", "BedroomRatio", "PopDensity", "IncomePerRoom",
-       "LatBin", "LonBin"]
-)
+feature_cols = list(housing.feature_names) + [
+    "RoomsPerPerson",
+    "BedroomRatio",
+    "PopDensity",
+    "IncomePerRoom",
+    "LatBin",
+    "LonBin",
+]
 # Handle any NaN from qcut
 df[feature_cols] = df[feature_cols].fillna(0)
 
 X = df[feature_cols].values
 y = df["LogMedHouseVal"].values  # log-transformed target
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.2, random_state=RANDOM_STATE
-)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=RANDOM_STATE)
 
 scaler = StandardScaler()
 X_train_scaled = scaler.fit_transform(X_train)
@@ -199,12 +200,9 @@ models = {
     "Linear Regression": LinearRegression(),
     "Ridge (alpha=1.0)": Ridge(alpha=1.0, random_state=RANDOM_STATE),
     "Lasso (alpha=0.001)": Lasso(alpha=0.001, random_state=RANDOM_STATE),
-    "Random Forest (50)": RandomForestRegressor(
-        n_estimators=50, max_depth=12, n_jobs=-1, random_state=RANDOM_STATE
-    ),
+    "Random Forest (50)": RandomForestRegressor(n_estimators=50, max_depth=12, n_jobs=-1, random_state=RANDOM_STATE),
     "Gradient Boosting": GradientBoostingRegressor(
-        n_estimators=100, max_depth=4, learning_rate=0.1,
-        subsample=0.8, random_state=RANDOM_STATE
+        n_estimators=100, max_depth=4, learning_rate=0.1, subsample=0.8, random_state=RANDOM_STATE
     ),
 }
 
@@ -218,25 +216,27 @@ for name, model in models.items():
     y_pred = model.predict(X_test_scaled)
 
     # Cross-validation
-    cv_scores = cross_val_score(model, X_train_scaled, y_train,
-                                cv=cv, scoring="r2", n_jobs=-1)
+    cv_scores = cross_val_score(model, X_train_scaled, y_train, cv=cv, scoring="r2", n_jobs=-1)
 
     mse = mean_squared_error(y_test, y_pred)
     mae = mean_absolute_error(y_test, y_pred)
     r2 = r2_score(y_test, y_pred)
     rmse = np.sqrt(mse)
 
-    results.append({
-        "Model": name,
-        "R² Score": round(r2, 4),
-        "RMSE": round(rmse, 4),
-        "MAE": round(mae, 4),
-        "CV R² Mean": round(cv_scores.mean(), 4),
-        "CV R² Std": round(cv_scores.std(), 4),
-    })
+    results.append(
+        {
+            "Model": name,
+            "R² Score": round(r2, 4),
+            "RMSE": round(rmse, 4),
+            "MAE": round(mae, 4),
+            "CV R² Mean": round(cv_scores.mean(), 4),
+            "CV R² Std": round(cv_scores.std(), 4),
+        }
+    )
 
-    print(f"  {name:30s}  R²={r2:.4f}  RMSE={rmse:.4f}  MAE={mae:.4f}  "
-          f"CV R²={cv_scores.mean():.4f}±{cv_scores.std():.4f}")
+    print(
+        f"  {name:30s}  R²={r2:.4f}  RMSE={rmse:.4f}  MAE={mae:.4f}  CV R²={cv_scores.mean():.4f}±{cv_scores.std():.4f}"
+    )
 
     if cv_scores.mean() > best_score:
         best_score = cv_scores.mean()
@@ -248,14 +248,12 @@ print(f"\n  ⭐ Best model: {best_model[0]} (CV R² = {best_score:.4f})")
 
 # Model comparison chart
 plt.figure(figsize=(10, 6))
-bars = plt.barh(results_df["Model"], results_df["R² Score"],
-                color=sns.color_palette("viridis", len(results_df)))
+bars = plt.barh(results_df["Model"], results_df["R² Score"], color=sns.color_palette("viridis", len(results_df)))
 plt.xlabel("R² Score (test set)")
 plt.title("Regression Model Comparison — R² Score", fontsize=14)
 plt.xlim(0, 1)
 for bar, score in zip(bars, results_df["R² Score"]):
-    plt.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2,
-             f"{score:.4f}", va="center", fontsize=10)
+    plt.text(bar.get_width() + 0.01, bar.get_y() + bar.get_height() / 2, f"{score:.4f}", va="center", fontsize=10)
 plt.tight_layout()
 plt.savefig(os.path.join(CHARTS, "model_comparison.png"), dpi=150, bbox_inches="tight")
 plt.close()
@@ -284,12 +282,8 @@ else:
     base_model = Ridge(random_state=RANDOM_STATE)
 
 # Speed up tuning by using a subset for grid search
-X_gs, _, y_gs, _ = train_test_split(
-    X_train_scaled, y_train, train_size=0.5, random_state=RANDOM_STATE
-)
-grid = GridSearchCV(
-    base_model, param_grid, cv=3, scoring="r2", n_jobs=-1, verbose=0
-)
+X_gs, _, y_gs, _ = train_test_split(X_train_scaled, y_train, train_size=0.5, random_state=RANDOM_STATE)
+grid = GridSearchCV(base_model, param_grid, cv=3, scoring="r2", n_jobs=-1, verbose=0)
 grid.fit(X_gs, y_gs)
 
 print(f"  Best params: {grid.best_params_}")
@@ -330,6 +324,7 @@ axes[0, 1].set_title("Residual Distribution")
 
 # Q-Q plot (using numpy percentile)
 from scipy import stats
+
 stats.probplot(residuals, dist="norm", plot=axes[1, 0])
 axes[1, 0].set_title("Q-Q Plot (Normality Check)")
 
@@ -337,8 +332,7 @@ axes[1, 0].set_title("Q-Q Plot (Normality Check)")
 axes[1, 1].scatter(y_test, y_pred_tuned, alpha=0.3, s=5, c="green")
 min_val = min(y_test.min(), y_pred_tuned.min())
 max_val = max(y_test.max(), y_pred_tuned.max())
-axes[1, 1].plot([min_val, max_val], [min_val, max_val],
-                "r--", alpha=0.5, linewidth=2)
+axes[1, 1].plot([min_val, max_val], [min_val, max_val], "r--", alpha=0.5, linewidth=2)
 axes[1, 1].set_xlabel("Actual (log scale)")
 axes[1, 1].set_ylabel("Predicted (log scale)")
 axes[1, 1].set_title("Actual vs Predicted")
@@ -361,16 +355,14 @@ elif hasattr(tuned_model, "coef_"):
 else:
     # Permutation importance fallback
     perm = permutation_importance(
-        tuned_model, X_test_scaled, y_test,
-        n_repeats=10, random_state=RANDOM_STATE, n_jobs=-1
+        tuned_model, X_test_scaled, y_test, n_repeats=10, random_state=RANDOM_STATE, n_jobs=-1
     )
     importances = perm.importances_mean
     imp_method = "Permutation importance"
 
-feat_importance = pd.DataFrame({
-    "Feature": feature_cols,
-    "Importance": importances
-}).sort_values("Importance", ascending=False)
+feat_importance = pd.DataFrame({"Feature": feature_cols, "Importance": importances}).sort_values(
+    "Importance", ascending=False
+)
 
 feat_importance.to_csv(os.path.join(OUTPUTS, "feature_importance.csv"), index=False)
 
@@ -401,9 +393,14 @@ print("\n[9] Learning curve analysis...")
 from sklearn.model_selection import learning_curve
 
 train_sizes, train_scores, val_scores = learning_curve(
-    tuned_model, X_train_scaled, y_train,
+    tuned_model,
+    X_train_scaled,
+    y_train,
     train_sizes=np.linspace(0.1, 1.0, 6),
-    cv=3, scoring="r2", n_jobs=-1, random_state=RANDOM_STATE
+    cv=3,
+    scoring="r2",
+    n_jobs=-1,
+    random_state=RANDOM_STATE,
 )
 
 train_mean = np.mean(train_scores, axis=1)
@@ -412,10 +409,8 @@ val_mean = np.mean(val_scores, axis=1)
 val_std = np.std(val_scores, axis=1)
 
 plt.figure(figsize=(10, 6))
-plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std,
-                 alpha=0.2, color="steelblue")
-plt.fill_between(train_sizes, val_mean - val_std, val_mean + val_std,
-                 alpha=0.2, color="coral")
+plt.fill_between(train_sizes, train_mean - train_std, train_mean + train_std, alpha=0.2, color="steelblue")
+plt.fill_between(train_sizes, val_mean - val_std, val_mean + val_std, alpha=0.2, color="coral")
 plt.plot(train_sizes, train_mean, "o-", label="Training R²", color="steelblue")
 plt.plot(train_sizes, val_mean, "s-", label="Validation R²", color="coral")
 plt.xlabel("Training Set Size")
@@ -435,11 +430,13 @@ print(f"  Final validation R²: {val_mean[-1]:.4f} ± {val_std[-1]:.4f}")
 print("\n" + "=" * 65)
 print("  RESULTS SUMMARY")
 print("=" * 65)
-print(f"\n  Best Model: {best_model[0]}"
-      f"\n  Tuned Params: {grid.best_params_}"
-      f"\n  Test R² Score:  {r2_tuned:.4f}"
-      f"\n  Test RMSE:      {rmse_tuned:.4f}  (in log-space)"
-      f"\n  Test MAE:       {mae_tuned:.4f}  (in log-space)")
+print(
+    f"\n  Best Model: {best_model[0]}"
+    f"\n  Tuned Params: {grid.best_params_}"
+    f"\n  Test R² Score:  {r2_tuned:.4f}"
+    f"\n  Test RMSE:      {rmse_tuned:.4f}  (in log-space)"
+    f"\n  Test MAE:       {mae_tuned:.4f}  (in log-space)"
+)
 print(f"\n  Back-transform: exp(RMSE) ≈ ${np.expm1(rmse_tuned) * 100_000:,.0f}")
 print(f"  Back-transform: exp(MAE) ≈ ${np.expm1(mae_tuned) * 100_000:,.0f}")
 
