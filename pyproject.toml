@@ -1,0 +1,31 @@
+[project]
+name = "data-analysis-portfolio"
+version = "0.1.0"
+description = "Data science and analytics portfolio projects"
+license = { text = "MIT" }
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = [
+    "E",   # pycodestyle errors
+    "W",   # pycodestyle warnings
+    "F",   # pyflakes
+    "I",   # isort
+    "N",   # naming
+]
+ignore = [
+    "E402",   # Module level import not at top — required for matplotlib Agg backend + late scipy imports in scripts
+    "E501",   # Line too long — notebook-generated code is exempt
+]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "auto"
+
+[tool.ruff.lint.per-file-ignores]
+"*.ipynb" = ["E401", "E402", "E501", "F401", "F541", "F811", "I001", "N803"]
+

@@ -9,14 +9,13 @@ Tabs:
   3. ℹ️ About — project info
 """
 
-import streamlit as st
-import pandas as pd
-import numpy as np
-import joblib
 import json
 import re
-import os
 from pathlib import Path
+
+import joblib
+import pandas as pd
+import streamlit as st
 
 # ── Paths ──────────────────────────────────────────────────────────────────
 BASE = Path(__file__).parent
@@ -35,19 +34,23 @@ st.set_page_config(
     initial_sidebar_state="expanded",
 )
 
+
 # ── Cached resources ───────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     return joblib.load(MODEL_PATH)
 
+
 @st.cache_resource
 def load_vectorizer():
     return joblib.load(VEC_PATH)
+
 
 @st.cache_data
 def load_metrics():
     with open(METRICS_PATH) as f:
         return json.load(f)
+
 
 @st.cache_data
 def load_predictions():
@@ -57,9 +60,9 @@ def load_predictions():
 
 
 # ── Text preprocessing (identical to notebook pipeline) ────────────────────
-from nltk.stem import PorterStemmer
-from nltk.corpus import stopwords
 import nltk
+from nltk.corpus import stopwords
+from nltk.stem import PorterStemmer
 
 nltk.download("stopwords", quiet=True)
 
@@ -71,10 +74,7 @@ def clean_text(text: str) -> str:
     """Clean & stem a single review — mirrors the notebook's `clean()`."""
     text = re.sub(r"<[^>]+>", " ", text).lower()
     text = re.sub(r"[^a-zA-Z\s]", "", text)
-    tokens = [
-        _stemmer.stem(t) for t in text.split()
-        if t not in _stop_words and len(t) > 2
-    ]
+    tokens = [_stemmer.stem(t) for t in text.split() if t not in _stop_words and len(t) > 2]
     return " ".join(tokens)
 
 
@@ -86,11 +86,13 @@ st.sidebar.markdown("**Accuracy:** 88.1% &nbsp;·&nbsp; **F1:** 0.882")
 st.sidebar.markdown("**ROC-AUC:** 0.953")
 
 # ── Tabs ───────────────────────────────────────────────────────────────────
-tab_dash, tab_live, tab_about = st.tabs([
-    "📊 Dashboard",
-    "🎯 Live Test",
-    "ℹ️ About",
-])
+tab_dash, tab_live, tab_about = st.tabs(
+    [
+        "📊 Dashboard",
+        "🎯 Live Test",
+        "ℹ️ About",
+    ]
+)
 
 # ═══════════════════════════════════════════════════════════════════════════
 # TAB 1 — Dashboard
@@ -155,9 +157,7 @@ with tab_dash:
             horizontal=True,
         )
     with search_col:
-        search_term = st.text_input(
-            "🔍 Search reviews (text contains…)", placeholder="Type to filter…"
-        )
+        search_term = st.text_input("🔍 Search reviews (text contains…)", placeholder="Type to filter…")
 
     # Apply filters
     display = preds_df.copy()
@@ -167,9 +167,7 @@ with tab_dash:
         display = display[display["label"] != display["prediction"]]
 
     if search_term:
-        display = display[
-            display["text"].str.contains(search_term, case=False, na=False)
-        ]
+        display = display[display["text"].str.contains(search_term, case=False, na=False)]
 
     # Show sample size
     st.caption(f"Showing {len(display):,} of {len(preds_df):,} reviews")
@@ -178,12 +176,9 @@ with tab_dash:
     display_disp = display.head(100).copy()
     display_disp["text_short"] = display_disp["text"].str[:200] + "…"
     display_disp["actual"] = display_disp["label"].map({1: "🟢 Positive", 0: "🔴 Negative"})
-    display_disp["predicted_text"] = display_disp["prediction"].map(
-        {1: "🟢 Positive", 0: "🔴 Negative"}
-    )
+    display_disp["predicted_text"] = display_disp["prediction"].map({1: "🟢 Positive", 0: "🔴 Negative"})
     display_disp["confidence"] = display_disp.apply(
-        lambda r: f"{r['probability']:.1%}" if r["prediction"] == 1
-        else f"{1 - r['probability']:.1%}",
+        lambda r: f"{r['probability']:.1%}" if r["prediction"] == 1 else f"{1 - r['probability']:.1%}",
         axis=1,
     )
 
@@ -206,9 +201,7 @@ with tab_dash:
 # ═══════════════════════════════════════════════════════════════════════════
 with tab_live:
     st.header("🎯 Test the Model Yourself")
-    st.markdown(
-        "Type or paste a movie review below and see what the model predicts."
-    )
+    st.markdown("Type or paste a movie review below and see what the model predicts.")
 
     review_input = st.text_area(
         "Your review",
@@ -273,10 +266,7 @@ with tab_live:
             for _, row in same_pred.iterrows():
                 label = "🟢 Positive" if row["label"] == 1 else "🔴 Negative"
                 correct = "✅" if row["label"] == row["prediction"] else "❌"
-                st.markdown(
-                    f"> {row['text'][:250]}…  \n"
-                    f"> *Actual: {label} {correct}*"
-                )
+                st.markdown(f"> {row['text'][:250]}…  \n> *Actual: {label} {correct}*")
                 st.markdown("---")
 
     else:
