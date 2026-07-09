@@ -45,7 +45,7 @@ jobs:
 
       - name: Check project directories
         run: |
-          for project in customer-rfm-segmentation nlp-sentiment-analysis house-price-prediction; do
+          for project in customer-rfm-segmentation nlp-sentiment-analysis house-price-prediction wine-quality-classification; do
             if [ -d "$project" ]; then
               echo "✅ $project directory exists"
             else
@@ -67,7 +67,8 @@ jobs:
           done
           for file in customer-rfm-segmentation/app.py customer-rfm-segmentation/README.md \
                        nlp-sentiment-analysis/app.py nlp-sentiment-analysis/README.md \
-                       house-price-prediction/analysis.py house-price-prediction/README.md; do
+                       house-price-prediction/analysis.py house-price-prediction/README.md \
+                       wine-quality-classification/analysis.py wine-quality-classification/README.md; do
             if [ -f "$file" ]; then
               echo "✅ $file exists"
             else
@@ -80,7 +81,7 @@ jobs:
       - name: Check Python syntax
         run: |
           errors=0
-          for pyfile in customer-rfm-segmentation/app.py nlp-sentiment-analysis/app.py house-price-prediction/analysis.py; do
+          for pyfile in customer-rfm-segmentation/app.py nlp-sentiment-analysis/app.py house-price-prediction/analysis.py wine-quality-classification/analysis.py; do
             if python -c "compile(open('$pyfile').read(), '$pyfile', 'exec')" 2>/dev/null; then
               echo "✅ $pyfile — valid syntax"
             else
