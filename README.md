@@ -64,6 +64,30 @@ A complete regression pipeline that predicts median house values across Californ
 
 | Key finding | The engineered `IncomePerRoom` feature dominates (43.8% importance) — neighborhood affluence density predicts price better than income alone. |
 
+### Project 4: Wine Quality Classification
+
+**Directory:** [`wine-quality-classification/`](wine-quality-classification/)
+
+A complete classification pipeline predicting red wine quality (0–10) from 11 physicochemical properties. Two approaches: binary (good wine >= 7 vs. poor) with four models compared, and multi-class exact score prediction. Random Forest achieves the best recall (58%) and ROC-AUC (0.955).
+
+| Detail | Value |
+|--------|-------|
+| Technique | Random Forest, Gradient Boosting, Logistic Regression, SVM, feature importance analysis |
+| Dataset | UCI Wine Quality — 1,599 red wine samples |
+| Tools | Scikit-learn, Pandas, Matplotlib, Seaborn |
+| Status | Complete |
+
+**Results:**
+
+| Model | Accuracy | F1 Score | ROC-AUC |
+|-------|----------|----------|---------|
+| **Random Forest** | **93.8%** | **0.714** | **0.955** |
+| Gradient Boosting | 93.1% | 0.703 | 0.916 |
+| SVM (RBF) | 90.0% | 0.500 | 0.889 |
+| Logistic Regression | 89.4% | 0.485 | 0.880 |
+
+| Key finding | Alcohol content (17.4%), sulphates (11.1%), and volatile acidity (10.2%) are the strongest predictors — confirming domain knowledge in oenology. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -77,6 +101,20 @@ A complete regression pipeline that predicts median house values across Californ
 **Top Predictive Features:**
 
 ![Top predictive features](nlp-sentiment-analysis/outputs/top_features.png)
+
+### Wine Quality —  Charts
+
+| Quality Distribution | ROC Curves |
+|:---:|:---:|
+| ![Distribution](wine-quality-classification/charts/01-quality-distribution.png) | ![ROC](wine-quality-classification/charts/04-roc-curves.png) |
+
+| Feature Importance | Model Comparison |
+|:---:|:---:|
+| ![Importance](wine-quality-classification/charts/07-feature-importance.png) | ![Comparison](wine-quality-classification/charts/05-model-comparison.png) |
+
+| Confusion Matrix (Best Model) | Multi-Class Matrix |
+|:---:|:---:|
+| ![Confusion](wine-quality-classification/charts/06-confusion-matrix.png) | ![Multi-class](wine-quality-classification/charts/08-multiclass-matrix.png) |
 
 ---
 
@@ -98,6 +136,11 @@ pip install -r requirements.txt
 jupyter notebook sentiment_analysis_executed.ipynb
 # Or launch the interactive dashboard:
 streamlit run app.py
+
+# Project 4: Wine Quality Classification
+cd wine-quality-classification
+pip install -r requirements.txt
+python analysis.py
 ```
 
 ## Tech Stack
