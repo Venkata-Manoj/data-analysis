@@ -88,6 +88,30 @@ A complete classification pipeline predicting red wine quality (0–10) from 11 
 
 | Key finding | Alcohol content (17.4%), sulphates (11.1%), and volatile acidity (10.2%) are the strongest predictors — confirming domain knowledge in oenology. |
 
+### Project 5: PM2.5 Air Quality Forecasting
+
+**Directory:** [`pm25-air-quality-forecasting/`](pm25-air-quality-forecasting/)
+
+A multivariate time series forecasting pipeline that predicts hourly PM2.5 concentration in Beijing using lag features, rolling statistics, and temporal features. Four models compared on a strict time-based split (train 2010–2013, test 2014). Linear Regression achieves **R² = 0.9465** and **MAE = 11.8 μg/m³**.
+
+| Detail | Value |
+|--------|-------|
+| Technique | Time series feature engineering, lag/rolling features, 4-model comparison |
+| Dataset | UCI Beijing PM2.5 — 43,824 hourly readings (2010–2014) |
+| Tools | Scikit-learn, XGBoost, Pandas, Matplotlib, Seaborn |
+| Status | Complete |
+
+**Results:**
+
+| Model | MAE | RMSE | R² | MAPE |
+|-------|-----|------|----|------|
+| **Linear Regression** | **11.78** | **21.56** | **0.9465** | **23.56%** |
+| Ridge (α=10) | 11.78 | 21.56 | 0.9465 | 23.57% |
+| Random Forest | 12.05 | 23.42 | 0.9369 | 21.81% |
+| XGBoost | 12.59 | 24.06 | 0.9334 | 22.50% |
+
+| Key finding | Feature engineering (lag + rolling) matters more than model complexity for PM2.5 — even Linear Regression matches tree-based models given the right temporal features. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -112,11 +136,25 @@ A complete classification pipeline predicting red wine quality (0–10) from 11 
 |:---:|:---:|
 | ![Importance](wine-quality-classification/charts/07-feature-importance.png) | ![Comparison](wine-quality-classification/charts/05-model-comparison.png) |
 
-| Confusion Matrix (Best Model) | Multi-Class Matrix |
+|| Confusion Matrix (Best Model) | Multi-Class Matrix |
 |:---:|:---:|
 | ![Confusion](wine-quality-classification/charts/06-confusion-matrix.png) | ![Multi-class](wine-quality-classification/charts/08-multiclass-matrix.png) |
 
----
+### PM2.5 Air Quality — Charts
+
+| Predictions vs Actual | Feature Importance |
+|:---:|:---:|
+| ![Predictions](pm25-air-quality-forecasting/charts/02-predictions-vs-actual.png) | ![Feature importance](pm25-air-quality-forecasting/charts/05-feature-importance.png) |
+
+| Model Comparison | Residuals Distribution |
+|:---:|:---:|
+| ![Model comparison](pm25-air-quality-forecasting/charts/04-model-comparison.png) | ![Residuals](pm25-air-quality-forecasting/charts/06-residuals-distribution.png) |
+
+| Hourly Pattern | Weekly Pattern |
+|:---:|:---:|
+| ![Hourly](pm25-air-quality-forecasting/charts/07-hourly-pattern.png) | ![Weekly](pm25-air-quality-forecasting/charts/08-weekly-pattern.png) |
+
+|---
 
 ## Quick Start
 
@@ -139,6 +177,11 @@ streamlit run app.py
 
 # Project 4: Wine Quality Classification
 cd wine-quality-classification
+pip install -r requirements.txt
+python analysis.py
+
+# Project 5: PM2.5 Air Quality Forecasting
+cd pm25-air-quality-forecasting
 pip install -r requirements.txt
 python analysis.py
 ```
