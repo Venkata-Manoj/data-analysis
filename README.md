@@ -110,7 +110,30 @@ A multivariate time series forecasting pipeline that predicts hourly PM2.5 conce
 | Random Forest | 12.05 | 23.42 | 0.9369 | 21.81% |
 | XGBoost | 12.59 | 24.06 | 0.9334 | 22.50% |
 
-| Key finding | Feature engineering (lag + rolling) matters more than model complexity for PM2.5 — even Linear Regression matches tree-based models given the right temporal features. |
+|| Key finding | Feature engineering (lag + rolling) matters more than model complexity for PM2.5 — even Linear Regression matches tree-based models given the right temporal features. |
+
+### Project 6: Topic Modeling — 20 Newsgroups
+
+**Directory:** [`topic-modeling-newsgroups/`](topic-modeling-newsgroups/)
+
+An unsupervised text mining pipeline that discovers latent themes across 8 categories of the 20 Newsgroups dataset. Compares three algorithms: NMF, Latent Dirichlet Allocation (LDA), and TruncatedSVD (LSA). LDA achieves the best coherence (0.2017), while NMF produces the most interpretable keyword sets. Includes 6 visualizations: word clouds, topic-term heatmaps, model comparison, topic-category alignment, confidence distributions, and 3D topic space.
+
+| Detail | Value |
+|--------|-------|
+| Technique | NMF, LDA, TruncatedSVD (LSA), topic coherence evaluation |
+| Dataset | [20 Newsgroups](https://scikit-learn.org/stable/datasets/real_world.html#newsgroups-dataset) (sklearn) — 1,600 docs, 8 categories |
+| Tools | Scikit-learn, Pandas, Matplotlib, Seaborn, WordCloud |
+| Status | Complete |
+
+**Results:**
+
+| Model | Mean Coherence | Strength |
+|-------|---------------|----------|
+| **LDA (Online)** | **0.2017** | Best coherence; clear topic separation |
+| NMF | 0.0374 | Cleanest keyword sets per topic |
+| TruncatedSVD (LSA) | 0.0451 | Best document similarity space |
+
+|| Key finding | LDA produces the most coherent topics (probabilistic separation), while NMF excels at interpretability (human-readable keyword sets). Topic modeling recovers ground-truth categories without ever seeing labels. |
 
 ### Visual Gallery
 
@@ -150,9 +173,23 @@ A multivariate time series forecasting pipeline that predicts hourly PM2.5 conce
 |:---:|:---:|
 | ![Model comparison](pm25-air-quality-forecasting/charts/04-model-comparison.png) | ![Residuals](pm25-air-quality-forecasting/charts/06-residuals-distribution.png) |
 
-| Hourly Pattern | Weekly Pattern |
-|:---:|:---:|
-| ![Hourly](pm25-air-quality-forecasting/charts/07-hourly-pattern.png) | ![Weekly](pm25-air-quality-forecasting/charts/08-weekly-pattern.png) |
+|| Hourly Pattern | Weekly Pattern |
+||:---:|:---:|
+|| ![Hourly](pm25-air-quality-forecasting/charts/07-hourly-pattern.png) | ![Weekly](pm25-air-quality-forecasting/charts/08-weekly-pattern.png) |
+
+### Topic Modeling — Charts
+
+|| Word Clouds (NMF) | Topic-Term Heatmap |
+||:---:|:---:|
+|| ![Word clouds](topic-modeling-newsgroups/charts/01-topic-wordclouds.png) | ![Topic-term heatmap](topic-modeling-newsgroups/charts/02-topic-term-heatmap.png) |
+
+|| Model Comparison | Topic-Category Alignment |
+||:---:|:---:|
+|| ![Model comparison](topic-modeling-newsgroups/charts/03-model-comparison.png) | ![Topic-category heatmap](topic-modeling-newsgroups/charts/04-topic-category-heatmap.png) |
+
+|| Assignment Confidence | 3D Topic Space |
+||:---:|:---:|
+|| ![Confidence histogram](topic-modeling-newsgroups/charts/05-topic-confidence-histogram.png) | ![3D topic space](topic-modeling-newsgroups/charts/06-3d-topic-space.png) |
 
 |---
 
@@ -184,6 +221,11 @@ python analysis.py
 cd pm25-air-quality-forecasting
 pip install -r requirements.txt
 python analysis.py
+
+# Project 6: Topic Modeling — 20 Newsgroups
+cd topic-modeling-newsgroups
+pip install -r requirements.txt
+python topic_modeling.py
 ```
 
 ## Tech Stack
@@ -192,6 +234,7 @@ python analysis.py
 - **Data:** Pandas, NumPy
 - **ML:** Scikit-learn, NLTK
 - **Visualisation:** Matplotlib, Seaborn, Plotly, WordCloud
+- **NLP:** NLTK, WordCloud
 - **Notebooks:** Jupyter
 - **Datasets:** Hugging Face Datasets, UCI Repository, sklearn datasets
 
