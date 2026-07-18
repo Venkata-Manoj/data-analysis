@@ -4,6 +4,7 @@ venv/
 __pycache__/
 *.pyc
 .env
+.hermes/
 
 # Project-specific generated outputs
 **/outputs/
