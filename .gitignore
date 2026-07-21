@@ -9,4 +9,5 @@ __pycache__/
 # Project-specific generated outputs
 **/outputs/
 **/data/
+**/charts/
 **/.ipynb_checkpoints/
