@@ -15,32 +15,34 @@ Data Analysis Portfolio, demonstrating:
   - Learning dynamics of neural networks
 """
 
-import os
 import time
 import warnings
 from pathlib import Path
 
 import matplotlib
+
 matplotlib.use('Agg')  # Non-interactive backend for chart generation
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
-
 import numpy as np
-import pandas as pd
 import seaborn as sns
-
 from sklearn.datasets import fetch_openml
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler, LabelEncoder
 from sklearn.decomposition import PCA
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.linear_model import LogisticRegression
-from sklearn.neural_network import MLPClassifier
-from sklearn.metrics import (
-    accuracy_score, precision_score, recall_score, f1_score,
-    confusion_matrix, ConfusionMatrixDisplay, classification_report
-)
 from sklearn.exceptions import ConvergenceWarning
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    accuracy_score,
+    classification_report,
+    confusion_matrix,
+    f1_score,
+    precision_score,
+    recall_score,
+)
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import LabelEncoder, StandardScaler
 
 # ── Configuration ──────────────────────────────────────────────────────────
 RANDOM_STATE = 42
@@ -83,16 +85,16 @@ def load_data():
     print("\n[1/8] Loading Fashion-MNIST dataset...")
     t0 = time.time()
 
-    X, y = fetch_openml(
+    x, y = fetch_openml(
         'Fashion-MNIST', version=1, return_X_y=True, as_frame=False,
         data_home=str(DATA_DIR)
     )
-    print(f"  Full dataset: {X.shape[0]} samples, {X.shape[1]} features")
+    print(f"  Full dataset: {x.shape[0]} samples, {x.shape[1]} features")
     print(f"  Classes: {np.unique(y).tolist()}")
 
     # Subsample for faster execution
-    idx = np.random.choice(X.shape[0], SUBSAMPLE_SIZE, replace=False)
-    X, y = X[idx], y[idx]
+    idx = np.random.choice(x.shape[0], SUBSAMPLE_SIZE, replace=False)
+    x, y = x[idx], y[idx]
     print(f"  Subsampled to {SUBSAMPLE_SIZE} samples")
 
     # Encode labels
@@ -100,19 +102,19 @@ def load_data():
     y_encoded = le.fit_transform(y)
 
     # Train/test split
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y_encoded, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y_encoded
+    x_train, x_test, y_train, y_test = train_test_split(
+        x, y_encoded, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=y_encoded
     )
-    print(f"  Train: {X_train.shape[0]}, Test: {X_test.shape[0]}")
+    print(f"  Train: {x_train.shape[0]}, Test: {x_test.shape[0]}")
     print(f"  Time: {time.time() - t0:.1f}s")
 
-    return X_train, X_test, y_train, y_test, le
+    return x_train, x_test, y_train, y_test, le
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 2. EXPLORATORY DATA ANALYSIS
 # ═══════════════════════════════════════════════════════════════════════════
-def exploratory_analysis(X_train, y_train):
+def exploratory_analysis(x_train, y_train):
     """Generate EDA charts."""
     print("\n[2/8] Exploratory Data Analysis...")
     t0 = time.time()
@@ -123,7 +125,7 @@ def exploratory_analysis(X_train, y_train):
     for i in range(10):
         mask = y_train == i
         idx = np.where(mask)[0][0]
-        img = X_train[idx].reshape(28, 28)
+        img = x_train[idx].reshape(28, 28)
         axes[i].imshow(img, cmap='gray')
         axes[i].set_title(CLASS_NAMES[i], fontsize=11, fontweight='bold')
         axes[i].axis('off')
@@ -156,7 +158,7 @@ def exploratory_analysis(X_train, y_train):
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     for ax, label, data in zip(
         axes, ['All Pixels', 'Mean Image (averaged over all samples)'],
-        [X_train.ravel(), X_train.mean(axis=0).reshape(28, 28)]
+        [x_train.ravel(), x_train.mean(axis=0).reshape(28, 28)]
     ):
         if label == 'All Pixels':
             ax.hist(data, bins=64, color='steelblue', edgecolor='white',
@@ -179,21 +181,21 @@ def exploratory_analysis(X_train, y_train):
 # ═══════════════════════════════════════════════════════════════════════════
 # 3. PCA VISUALIZATION
 # ═══════════════════════════════════════════════════════════════════════════
-def pca_analysis(X_train, y_train, X_test):
+def pca_analysis(x_train, y_train, x_test):
     """PCA for dimensionality reduction, visualization, and transformed data."""
     print("\n[3/8] PCA dimensionality reduction...")
     t0 = time.time()
 
     # Scale first
     scaler = StandardScaler()
-    X_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+    x_scaled = scaler.fit_transform(x_train)
+    x_test_scaled = scaler.transform(x_test)
 
     # PCA: use n_components for both variance analysis and training transform
-    n_components = min(N_COMPONENTS_PCA, X_scaled.shape[1], X_scaled.shape[0])
+    n_components = min(N_COMPONENTS_PCA, x_scaled.shape[1], x_scaled.shape[0])
     pca_obj = PCA(n_components=n_components, random_state=RANDOM_STATE)
-    X_train_pca = pca_obj.fit_transform(X_scaled)
-    X_test_pca = pca_obj.transform(X_test_scaled)
+    x_train_pca = pca_obj.fit_transform(x_scaled)
+    x_test_pca = pca_obj.transform(x_test_scaled)
     cum_var = np.cumsum(pca_obj.explained_variance_ratio_)
     print(f"  PCA: {n_components} components, "
           f"{cum_var[-1]:.1%} total variance explained")
@@ -220,12 +222,12 @@ def pca_analysis(X_train, y_train, X_test):
 
     # PCA to 2D for visualization
     pca_2d = PCA(n_components=2, random_state=RANDOM_STATE)
-    X_pca_2d = pca_2d.fit_transform(X_scaled)
+    x_pca_2d = pca_2d.fit_transform(x_scaled)
 
     # ── Chart 5: 2D PCA scatter ──
     fig, ax = plt.subplots(figsize=(12, 8))
     scatter = ax.scatter(
-        X_pca_2d[:, 0], X_pca_2d[:, 1], c=y_train, cmap='tab10',
+        x_pca_2d[:, 0], x_pca_2d[:, 1], c=y_train, cmap='tab10',
         alpha=0.4, s=4, edgecolors='none'
     )
     legend1 = ax.legend(
@@ -249,13 +251,13 @@ def pca_analysis(X_train, y_train, X_test):
     print("  ✅ Chart 5: 2D PCA visualization")
 
     print(f"  Time: {time.time() - t0:.1f}s")
-    return X_train_pca, X_test_pca
+    return x_train_pca, x_test_pca
 
 
 # ═══════════════════════════════════════════════════════════════════════════
 # 4-6. MODEL TRAINING AND COMPARISON
 # ═══════════════════════════════════════════════════════════════════════════
-def train_models(X_train, y_train, X_test, y_test):
+def train_models(x_train, y_train, x_test, y_test):
     """Train and evaluate multiple classifiers on PCA-reduced data."""
     results = {}
 
@@ -266,8 +268,8 @@ def train_models(X_train, y_train, X_test, y_test):
         solver='lbfgs', max_iter=500,
         C=1.0, random_state=RANDOM_STATE, n_jobs=-1
     )
-    lr.fit(X_train, y_train)
-    y_pred_lr = lr.predict(X_test)
+    lr.fit(x_train, y_train)
+    y_pred_lr = lr.predict(x_test)
     results['Logistic Regression'] = {
         'model': lr,
         'y_pred': y_pred_lr,
@@ -284,8 +286,8 @@ def train_models(X_train, y_train, X_test, y_test):
         n_estimators=100, max_depth=15, min_samples_split=5,
         random_state=RANDOM_STATE, n_jobs=-1
     )
-    rf.fit(X_train, y_train)
-    y_pred_rf = rf.predict(X_test)
+    rf.fit(x_train, y_train)
+    y_pred_rf = rf.predict(x_test)
     results['Random Forest'] = {
         'model': rf,
         'y_pred': y_pred_rf,
@@ -307,8 +309,8 @@ def train_models(X_train, y_train, X_test, y_test):
             max_iter=80, early_stopping=True, validation_fraction=0.1,
             random_state=RANDOM_STATE, verbose=False
         )
-        mlp.fit(X_train, y_train)
-    y_pred_mlp = mlp.predict(X_test)
+        mlp.fit(x_train, y_train)
+    y_pred_mlp = mlp.predict(x_test)
     results['Neural Network (MLP)'] = {
         'model': mlp,
         'y_pred': y_pred_mlp,
@@ -497,16 +499,16 @@ def main():
     pipeline_start = time.time()
 
     # Step 1: Load
-    X_train, X_test, y_train, y_test, label_encoder = load_data()
+    x_train, x_test, y_train, y_test, label_encoder = load_data()
 
     # Step 2: EDA
-    exploratory_analysis(X_train, y_train)
+    exploratory_analysis(x_train, y_train)
 
     # Step 3: PCA (returns scaled+transformed data for training)
-    X_train_pca, X_test_pca = pca_analysis(X_train, y_train, X_test)
+    x_train_pca, x_test_pca = pca_analysis(x_train, y_train, x_test)
 
     # Steps 4-6: Train models on PCA-reduced data
-    results = train_models(X_train_pca, y_train, X_test_pca, y_test)
+    results = train_models(x_train_pca, y_train, x_test_pca, y_test)
 
     # Step 7: Evaluation charts
     best_name = evaluation_charts(results, y_test)
