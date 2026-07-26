@@ -135,6 +135,29 @@ An unsupervised text mining pipeline that discovers latent themes across 8 categ
 
 || Key finding | LDA produces the most coherent topics (probabilistic separation), while NMF excels at interpretability (human-readable keyword sets). Topic modeling recovers ground-truth categories without ever seeing labels. |
 
+### Project 7: Fashion-MNIST Image Classification
+
+**Directory:** [`fashion-mnist-classification/`](fashion-mnist-classification/)
+
+A complete image classification pipeline comparing traditional ML (Random Forest, Logistic Regression) with a Neural Network (MLPClassifier) on **Fashion-MNIST** — 70,000 grayscale 28×28 images across 10 clothing categories. Uses PCA dimensionality reduction (30 components, 75.6% variance retained) for efficient training and visualization.
+
+| Detail | Value |
+|--------|-------|
+| Technique | PCA, Logistic Regression, Random Forest, MLPClassifier (128→64), confusion matrix analysis |
+| Dataset | [Fashion-MNIST](https://www.openml.org/d/40996) (OpenML) — 70k grayscale images |
+| Tools | Scikit-learn, Matplotlib, Seaborn, NumPy |
+| Status | Complete |
+
+**Results:**
+
+| Model | Accuracy | Time (s) |
+|-------|----------|----------|
+| **Neural Network (MLP)** | **81.75%** | **0.4** |
+| Random Forest | 81.25% | 0.5 |
+| Logistic Regression | 80.00% | 0.4 |
+
+| Key finding | The MLP outperforms traditional methods, but struggles with visually similar classes (Shirt vs. T-shirt/top). Items with distinct silhouettes (Trouser, Bag, Boot) achieve near-perfect F1 (>0.90). |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -149,7 +172,7 @@ An unsupervised text mining pipeline that discovers latent themes across 8 categ
 
 ![Top predictive features](nlp-sentiment-analysis/outputs/top_features.png)
 
-### Wine Quality —  Charts
+### Wine Quality — Charts
 
 | Quality Distribution | ROC Curves |
 |:---:|:---:|
@@ -159,7 +182,7 @@ An unsupervised text mining pipeline that discovers latent themes across 8 categ
 |:---:|:---:|
 | ![Importance](wine-quality-classification/charts/07-feature-importance.png) | ![Comparison](wine-quality-classification/charts/05-model-comparison.png) |
 
-|| Confusion Matrix (Best Model) | Multi-Class Matrix |
+| Confusion Matrix (Best Model) | Multi-Class Matrix |
 |:---:|:---:|
 | ![Confusion](wine-quality-classification/charts/06-confusion-matrix.png) | ![Multi-class](wine-quality-classification/charts/08-multiclass-matrix.png) |
 
@@ -173,25 +196,39 @@ An unsupervised text mining pipeline that discovers latent themes across 8 categ
 |:---:|:---:|
 | ![Model comparison](pm25-air-quality-forecasting/charts/04-model-comparison.png) | ![Residuals](pm25-air-quality-forecasting/charts/06-residuals-distribution.png) |
 
-|| Hourly Pattern | Weekly Pattern |
-||:---:|:---:|
-|| ![Hourly](pm25-air-quality-forecasting/charts/07-hourly-pattern.png) | ![Weekly](pm25-air-quality-forecasting/charts/08-weekly-pattern.png) |
+| Hourly Pattern | Weekly Pattern |
+|:---:|:---:|
+| ![Hourly](pm25-air-quality-forecasting/charts/07-hourly-pattern.png) | ![Weekly](pm25-air-quality-forecasting/charts/08-weekly-pattern.png) |
+
+### Fashion-MNIST — Charts
+
+| Sample Images | PCA 2D Projection |
+|:---:|:---:|
+| ![Samples](fashion-mnist-classification/charts/01-sample-images.png) | ![PCA](fashion-mnist-classification/charts/05-pca-2d-visualization.png) |
+
+| Model Comparison | Confusion Matrix (MLP) |
+|:---:|:---:|
+| ![Comparison](fashion-mnist-classification/charts/06-model-comparison.png) | ![Confusion](fashion-mnist-classification/charts/07-confusion-matrix-best-model.png) |
+
+| Per-Class F1 | MLP Learning Curves |
+|:---:|:---:|
+| ![F1](fashion-mnist-classification/charts/08-per-class-performance.png) | ![Learning curves](fashion-mnist-classification/charts/09-mlp-learning-curves.png) |
 
 ### Topic Modeling — Charts
 
-|| Word Clouds (NMF) | Topic-Term Heatmap |
-||:---:|:---:|
-|| ![Word clouds](topic-modeling-newsgroups/charts/01-topic-wordclouds.png) | ![Topic-term heatmap](topic-modeling-newsgroups/charts/02-topic-term-heatmap.png) |
+| Word Clouds (NMF) | Topic-Term Heatmap |
+|:---:|:---:|
+| ![Word clouds](topic-modeling-newsgroups/charts/01-topic-wordclouds.png) | ![Topic-term heatmap](topic-modeling-newsgroups/charts/02-topic-term-heatmap.png) |
 
-|| Model Comparison | Topic-Category Alignment |
-||:---:|:---:|
-|| ![Model comparison](topic-modeling-newsgroups/charts/03-model-comparison.png) | ![Topic-category heatmap](topic-modeling-newsgroups/charts/04-topic-category-heatmap.png) |
+| Model Comparison | Topic-Category Alignment |
+|:---:|:---:|
+| ![Model comparison](topic-modeling-newsgroups/charts/03-model-comparison.png) | ![Topic-category heatmap](topic-modeling-newsgroups/charts/04-topic-category-heatmap.png) |
 
-|| Assignment Confidence | 3D Topic Space |
-||:---:|:---:|
-|| ![Confidence histogram](topic-modeling-newsgroups/charts/05-topic-confidence-histogram.png) | ![3D topic space](topic-modeling-newsgroups/charts/06-3d-topic-space.png) |
+| Assignment Confidence | 3D Topic Space |
+|:---:|:---:|
+| ![Confidence histogram](topic-modeling-newsgroups/charts/05-topic-confidence-histogram.png) | ![3D topic space](topic-modeling-newsgroups/charts/06-3d-topic-space.png) |
 
-|---
+---
 
 ## Quick Start
 
@@ -226,6 +263,13 @@ python analysis.py
 cd topic-modeling-newsgroups
 pip install -r requirements.txt
 python topic_modeling.py
+
+# Project 7: Fashion-MNIST Image Classification
+cd fashion-mnist-classification
+python -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+python analysis.py
 ```
 
 ## Tech Stack
@@ -236,7 +280,7 @@ python topic_modeling.py
 - **Visualisation:** Matplotlib, Seaborn, Plotly, WordCloud
 - **NLP:** NLTK, WordCloud
 - **Notebooks:** Jupyter
-- **Datasets:** Hugging Face Datasets, UCI Repository, sklearn datasets
+- **Datasets:** Hugging Face Datasets, UCI Repository, sklearn datasets, OpenML
 
 ## License
 
