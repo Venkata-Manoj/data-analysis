@@ -21,7 +21,7 @@ from pathlib import Path
 
 import matplotlib
 
-matplotlib.use('Agg')  # Non-interactive backend for chart generation
+matplotlib.use("Agg")  # Non-interactive backend for chart generation
 import matplotlib.pyplot as plt
 import matplotlib.ticker as mticker
 import numpy as np
@@ -47,8 +47,8 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 # ── Configuration ──────────────────────────────────────────────────────────
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
-SUBSAMPLE_SIZE = 2000           # Use 2k of 70k images for fast training
-N_COMPONENTS_PCA = 30           # Components for PCA transformation
+SUBSAMPLE_SIZE = 2000  # Use 2k of 70k images for fast training
+N_COMPONENTS_PCA = 30  # Components for PCA transformation
 np.random.seed(RANDOM_STATE)
 
 CHARTS_DIR = Path(__file__).parent / "charts"
@@ -59,17 +59,16 @@ for d in [CHARTS_DIR, DATA_DIR, OUTPUTS_DIR]:
 
 # Plot style
 sns.set_theme(style="whitegrid", palette="muted", font_scale=1.1)
-plt.rcParams.update({
-    'figure.dpi': 120,
-    'savefig.dpi': 150,
-    'savefig.bbox': 'tight',
-    'font.family': 'sans-serif',
-})
+plt.rcParams.update(
+    {
+        "figure.dpi": 120,
+        "savefig.dpi": 150,
+        "savefig.bbox": "tight",
+        "font.family": "sans-serif",
+    }
+)
 
-CLASS_NAMES = [
-    "T-shirt/top", "Trouser", "Pullover", "Dress", "Coat",
-    "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"
-]
+CLASS_NAMES = ["T-shirt/top", "Trouser", "Pullover", "Dress", "Coat", "Sandal", "Shirt", "Sneaker", "Bag", "Ankle boot"]
 
 print("=" * 65)
 print("  Fashion-MNIST Image Classification")
@@ -85,10 +84,7 @@ def load_data():
     print("\n[1/8] Loading Fashion-MNIST dataset...")
     t0 = time.time()
 
-    x, y = fetch_openml(
-        'Fashion-MNIST', version=1, return_X_y=True, as_frame=False,
-        data_home=str(DATA_DIR)
-    )
+    x, y = fetch_openml("Fashion-MNIST", version=1, return_X_y=True, as_frame=False, data_home=str(DATA_DIR))
     print(f"  Full dataset: {x.shape[0]} samples, {x.shape[1]} features")
     print(f"  Classes: {np.unique(y).tolist()}")
 
@@ -126,11 +122,10 @@ def exploratory_analysis(x_train, y_train):
         mask = y_train == i
         idx = np.where(mask)[0][0]
         img = x_train[idx].reshape(28, 28)
-        axes[i].imshow(img, cmap='gray')
-        axes[i].set_title(CLASS_NAMES[i], fontsize=11, fontweight='bold')
-        axes[i].axis('off')
-    fig.suptitle('Fashion-MNIST — Sample Images (One Per Class)',
-                 fontsize=14, fontweight='bold', y=1.02)
+        axes[i].imshow(img, cmap="gray")
+        axes[i].set_title(CLASS_NAMES[i], fontsize=11, fontweight="bold")
+        axes[i].axis("off")
+    fig.suptitle("Fashion-MNIST — Sample Images (One Per Class)", fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "01-sample-images.png")
     plt.close(fig)
@@ -139,16 +134,16 @@ def exploratory_analysis(x_train, y_train):
     # ── Chart 2: Class distribution ──
     fig, ax = plt.subplots(figsize=(10, 5))
     counts = np.bincount(y_train)
-    bars = ax.bar(CLASS_NAMES, counts, color=sns.color_palette("muted", 10),
-                  edgecolor='white', linewidth=0.8)
-    ax.set_title('Class Distribution (Training Set)', fontsize=13, fontweight='bold')
-    ax.set_ylabel('Count')
-    ax.set_xlabel('Class')
-    ax.tick_params(axis='x', rotation=45)
+    bars = ax.bar(CLASS_NAMES, counts, color=sns.color_palette("muted", 10), edgecolor="white", linewidth=0.8)
+    ax.set_title("Class Distribution (Training Set)", fontsize=13, fontweight="bold")
+    ax.set_ylabel("Count")
+    ax.set_xlabel("Class")
+    ax.tick_params(axis="x", rotation=45)
     # Add count labels on bars
     for bar, count in zip(bars, counts):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 20,
-                str(count), ha='center', va='bottom', fontsize=9)
+        ax.text(
+            bar.get_x() + bar.get_width() / 2, bar.get_height() + 20, str(count), ha="center", va="bottom", fontsize=9
+        )
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "02-class-distribution.png")
     plt.close(fig)
@@ -157,18 +152,18 @@ def exploratory_analysis(x_train, y_train):
     # ── Chart 3: Pixel intensity distribution ──
     fig, axes = plt.subplots(1, 2, figsize=(14, 5))
     for ax, label, data in zip(
-        axes, ['All Pixels', 'Mean Image (averaged over all samples)'],
-        [x_train.ravel(), x_train.mean(axis=0).reshape(28, 28)]
+        axes,
+        ["All Pixels", "Mean Image (averaged over all samples)"],
+        [x_train.ravel(), x_train.mean(axis=0).reshape(28, 28)],
     ):
-        if label == 'All Pixels':
-            ax.hist(data, bins=64, color='steelblue', edgecolor='white',
-                    alpha=0.8, linewidth=0.5)
-            ax.set_title('Pixel Intensity Distribution', fontsize=12, fontweight='bold')
-            ax.set_xlabel('Pixel Intensity')
-            ax.set_ylabel('Frequency')
+        if label == "All Pixels":
+            ax.hist(data, bins=64, color="steelblue", edgecolor="white", alpha=0.8, linewidth=0.5)
+            ax.set_title("Pixel Intensity Distribution", fontsize=12, fontweight="bold")
+            ax.set_xlabel("Pixel Intensity")
+            ax.set_ylabel("Frequency")
         else:
-            im = ax.imshow(data, cmap='viridis')
-            ax.set_title('Mean Image (All Classes)', fontsize=12, fontweight='bold')
+            im = ax.imshow(data, cmap="viridis")
+            ax.set_title("Mean Image (All Classes)", fontsize=12, fontweight="bold")
             plt.colorbar(im, ax=ax, shrink=0.8)
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "03-pixel-intensity.png")
@@ -197,21 +192,17 @@ def pca_analysis(x_train, y_train, x_test):
     x_train_pca = pca_obj.fit_transform(x_scaled)
     x_test_pca = pca_obj.transform(x_test_scaled)
     cum_var = np.cumsum(pca_obj.explained_variance_ratio_)
-    print(f"  PCA: {n_components} components, "
-          f"{cum_var[-1]:.1%} total variance explained")
+    print(f"  PCA: {n_components} components, {cum_var[-1]:.1%} total variance explained")
 
     # ── Chart 4: Cumulative explained variance ──
     fig, ax = plt.subplots(figsize=(10, 5))
-    ax.plot(range(1, len(cum_var) + 1), cum_var, linewidth=2, color='darkorange',
-            marker='.', markersize=3)
-    ax.axhline(0.8, color='gray', linestyle='--', alpha=0.7, label='80% threshold')
+    ax.plot(range(1, len(cum_var) + 1), cum_var, linewidth=2, color="darkorange", marker=".", markersize=3)
+    ax.axhline(0.8, color="gray", linestyle="--", alpha=0.7, label="80% threshold")
     n_80 = np.argmax(cum_var >= 0.8) + 1 if cum_var[-1] >= 0.8 else n_components
-    ax.axvline(n_80, color='green', linestyle=':', alpha=0.6,
-               label=f'~{n_80} comps → 80%')
-    ax.set_title('Cumulative Explained Variance by PCA Components',
-                 fontsize=13, fontweight='bold')
-    ax.set_xlabel('Number of Principal Components')
-    ax.set_ylabel('Cumulative Explained Variance')
+    ax.axvline(n_80, color="green", linestyle=":", alpha=0.6, label=f"~{n_80} comps → 80%")
+    ax.set_title("Cumulative Explained Variance by PCA Components", fontsize=13, fontweight="bold")
+    ax.set_xlabel("Number of Principal Components")
+    ax.set_ylabel("Cumulative Explained Variance")
     ax.set_xlim(1, n_components)
     ax.legend(fontsize=9)
     ax.xaxis.set_major_locator(mticker.MaxNLocator(integer=True))
@@ -226,25 +217,20 @@ def pca_analysis(x_train, y_train, x_test):
 
     # ── Chart 5: 2D PCA scatter ──
     fig, ax = plt.subplots(figsize=(12, 8))
-    scatter = ax.scatter(
-        x_pca_2d[:, 0], x_pca_2d[:, 1], c=y_train, cmap='tab10',
-        alpha=0.4, s=4, edgecolors='none'
-    )
-    legend1 = ax.legend(
-        *scatter.legend_elements(),
-        title="Classes", loc='upper right', fontsize=8
-    )
+    scatter = ax.scatter(x_pca_2d[:, 0], x_pca_2d[:, 1], c=y_train, cmap="tab10", alpha=0.4, s=4, edgecolors="none")
+    legend1 = ax.legend(*scatter.legend_elements(), title="Classes", loc="upper right", fontsize=8)
     ax.add_artist(legend1)
     for text, name in zip(legend1.get_texts(), CLASS_NAMES):
         text.set_text(name)
     ax.set_title(
-        f'Fashion-MNIST — 2D PCA Projection\n'
-        f'({pca_2d.explained_variance_ratio_[0]:.1%} + '
-        f'{pca_2d.explained_variance_ratio_[1]:.1%} variance explained)',
-        fontsize=13, fontweight='bold'
+        f"Fashion-MNIST — 2D PCA Projection\n"
+        f"({pca_2d.explained_variance_ratio_[0]:.1%} + "
+        f"{pca_2d.explained_variance_ratio_[1]:.1%} variance explained)",
+        fontsize=13,
+        fontweight="bold",
     )
-    ax.set_xlabel(f'PC1 ({pca_2d.explained_variance_ratio_[0]:.1%})')
-    ax.set_ylabel(f'PC2 ({pca_2d.explained_variance_ratio_[1]:.1%})')
+    ax.set_xlabel(f"PC1 ({pca_2d.explained_variance_ratio_[0]:.1%})")
+    ax.set_ylabel(f"PC2 ({pca_2d.explained_variance_ratio_[1]:.1%})")
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "05-pca-2d-visualization.png")
     plt.close(fig)
@@ -264,61 +250,61 @@ def train_models(x_train, y_train, x_test, y_test):
     # ── Model 1: Logistic Regression ──
     print("\n[4/8] Training Logistic Regression...")
     t0 = time.time()
-    lr = LogisticRegression(
-        solver='lbfgs', max_iter=500,
-        C=1.0, random_state=RANDOM_STATE, n_jobs=-1
-    )
+    lr = LogisticRegression(solver="lbfgs", max_iter=500, C=1.0, random_state=RANDOM_STATE, n_jobs=-1)
     lr.fit(x_train, y_train)
     y_pred_lr = lr.predict(x_test)
-    results['Logistic Regression'] = {
-        'model': lr,
-        'y_pred': y_pred_lr,
-        'accuracy': accuracy_score(y_test, y_pred_lr),
-        'time': time.time() - t0,
+    results["Logistic Regression"] = {
+        "model": lr,
+        "y_pred": y_pred_lr,
+        "accuracy": accuracy_score(y_test, y_pred_lr),
+        "time": time.time() - t0,
     }
-    print(f"  Accuracy: {results['Logistic Regression']['accuracy']:.4f} "
-          f"({time.time() - t0:.1f}s)")
+    print(f"  Accuracy: {results['Logistic Regression']['accuracy']:.4f} ({time.time() - t0:.1f}s)")
 
     # ── Model 2: Random Forest ──
     print("\n[5/8] Training Random Forest...")
     t0 = time.time()
     rf = RandomForestClassifier(
-        n_estimators=100, max_depth=15, min_samples_split=5,
-        random_state=RANDOM_STATE, n_jobs=-1
+        n_estimators=100, max_depth=15, min_samples_split=5, random_state=RANDOM_STATE, n_jobs=-1
     )
     rf.fit(x_train, y_train)
     y_pred_rf = rf.predict(x_test)
-    results['Random Forest'] = {
-        'model': rf,
-        'y_pred': y_pred_rf,
-        'accuracy': accuracy_score(y_test, y_pred_rf),
-        'time': time.time() - t0,
+    results["Random Forest"] = {
+        "model": rf,
+        "y_pred": y_pred_rf,
+        "accuracy": accuracy_score(y_test, y_pred_rf),
+        "time": time.time() - t0,
     }
-    print(f"  Accuracy: {results['Random Forest']['accuracy']:.4f} "
-          f"({time.time() - t0:.1f}s)")
+    print(f"  Accuracy: {results['Random Forest']['accuracy']:.4f} ({time.time() - t0:.1f}s)")
 
     # ── Model 3: Neural Network (MLPClassifier) ──
     print("\n[6/8] Training Neural Network (MLPClassifier)...")
     t0 = time.time()
     with warnings.catch_warnings():
-        warnings.filterwarnings('ignore', category=ConvergenceWarning)
+        warnings.filterwarnings("ignore", category=ConvergenceWarning)
         mlp = MLPClassifier(
-            hidden_layer_sizes=(128, 64), activation='relu',
-            solver='adam', alpha=0.001, batch_size=128,
-            learning_rate='adaptive', learning_rate_init=0.001,
-            max_iter=80, early_stopping=True, validation_fraction=0.1,
-            random_state=RANDOM_STATE, verbose=False
+            hidden_layer_sizes=(128, 64),
+            activation="relu",
+            solver="adam",
+            alpha=0.001,
+            batch_size=128,
+            learning_rate="adaptive",
+            learning_rate_init=0.001,
+            max_iter=80,
+            early_stopping=True,
+            validation_fraction=0.1,
+            random_state=RANDOM_STATE,
+            verbose=False,
         )
         mlp.fit(x_train, y_train)
     y_pred_mlp = mlp.predict(x_test)
-    results['Neural Network (MLP)'] = {
-        'model': mlp,
-        'y_pred': y_pred_mlp,
-        'accuracy': accuracy_score(y_test, y_pred_mlp),
-        'time': time.time() - t0,
+    results["Neural Network (MLP)"] = {
+        "model": mlp,
+        "y_pred": y_pred_mlp,
+        "accuracy": accuracy_score(y_test, y_pred_mlp),
+        "time": time.time() - t0,
     }
-    print(f"  Accuracy: {results['Neural Network (MLP)']['accuracy']:.4f} "
-          f"({time.time() - t0:.1f}s)")
+    print(f"  Accuracy: {results['Neural Network (MLP)']['accuracy']:.4f} ({time.time() - t0:.1f}s)")
     print(f"  Iterations: {mlp.n_iter_}/{mlp.max_iter}")
 
     return results
@@ -335,42 +321,49 @@ def evaluation_charts(results, y_test):
     # ── Chart 6: Model Comparison Bar ──
     fig, ax = plt.subplots(figsize=(10, 6))
     names = list(results.keys())
-    accs = [results[n]['accuracy'] for n in names]
-    times = [results[n]['time'] for n in names]
-    colors = ['#3498db', '#2ecc71', '#e74c3c']
+    accs = [results[n]["accuracy"] for n in names]
+    times = [results[n]["time"] for n in names]
+    colors = ["#3498db", "#2ecc71", "#e74c3c"]
 
     x_pos = np.arange(len(names))
-    bars = ax.bar(x_pos, accs, color=colors, edgecolor='white', linewidth=1.2, width=0.5)
+    bars = ax.bar(x_pos, accs, color=colors, edgecolor="white", linewidth=1.2, width=0.5)
 
     for i, (bar, acc, t) in enumerate(zip(bars, accs, times)):
-        ax.text(bar.get_x() + bar.get_width() / 2, bar.get_height() + 0.003,
-                f'{acc:.4f}\n({t:.1f}s)', ha='center', va='bottom',
-                fontsize=10, fontweight='bold')
+        ax.text(
+            bar.get_x() + bar.get_width() / 2,
+            bar.get_height() + 0.003,
+            f"{acc:.4f}\n({t:.1f}s)",
+            ha="center",
+            va="bottom",
+            fontsize=10,
+            fontweight="bold",
+        )
 
     ax.set_xticks(x_pos)
-    ax.set_xticklabels(names, fontsize=11, fontweight='bold')
+    ax.set_xticklabels(names, fontsize=11, fontweight="bold")
     ax.set_ylim(0.7, 0.92)
-    ax.set_ylabel('Accuracy', fontsize=12)
-    ax.set_title('Model Comparison — Test Accuracy', fontsize=14, fontweight='bold')
-    ax.axhline(y=max(accs), color='gray', linestyle='--', alpha=0.5)
+    ax.set_ylabel("Accuracy", fontsize=12)
+    ax.set_title("Model Comparison — Test Accuracy", fontsize=14, fontweight="bold")
+    ax.axhline(y=max(accs), color="gray", linestyle="--", alpha=0.5)
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "06-model-comparison.png")
     plt.close(fig)
     print("  ✅ Chart 6: Model comparison")
 
     # ── Chart 7: Confusion Matrix (best model) ──
-    best_name = max(results, key=lambda n: results[n]['accuracy'])
-    best_pred = results[best_name]['y_pred']
+    best_name = max(results, key=lambda n: results[n]["accuracy"])
+    best_pred = results[best_name]["y_pred"]
 
     fig, ax = plt.subplots(figsize=(10, 9))
     cm = confusion_matrix(y_test, best_pred)
-    disp = ConfusionMatrixDisplay(
-        confusion_matrix=cm, display_labels=CLASS_NAMES
+    disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=CLASS_NAMES)
+    disp.plot(ax=ax, cmap="Blues", values_format="d", colorbar=True)
+    ax.set_title(
+        f"Confusion Matrix — {best_name}\n(Accuracy: {results[best_name]['accuracy']:.4f})",
+        fontsize=13,
+        fontweight="bold",
     )
-    disp.plot(ax=ax, cmap='Blues', values_format='d', colorbar=True)
-    ax.set_title(f'Confusion Matrix — {best_name}\n(Accuracy: {results[best_name]["accuracy"]:.4f})',
-                 fontsize=13, fontweight='bold')
-    ax.tick_params(axis='x', rotation=45)
+    ax.tick_params(axis="x", rotation=45)
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "07-confusion-matrix-best-model.png")
     plt.close(fig)
@@ -384,57 +377,54 @@ def evaluation_charts(results, y_test):
 
     metrics_data = {}
     for name in results:
-        y_pred = results[name]['y_pred']
+        y_pred = results[name]["y_pred"]
         metrics_data[name] = {
-            'precision': precision_score(y_test, y_pred, average=None),
-            'recall': recall_score(y_test, y_pred, average=None),
-            'f1': f1_score(y_test, y_pred, average=None),
+            "precision": precision_score(y_test, y_pred, average=None),
+            "recall": recall_score(y_test, y_pred, average=None),
+            "f1": f1_score(y_test, y_pred, average=None),
         }
 
     for name, color in [
-        ('Logistic Regression', '#3498db'),
-        ('Random Forest', '#2ecc71'),
-        ('Neural Network (MLP)', '#e74c3c'),
+        ("Logistic Regression", "#3498db"),
+        ("Random Forest", "#2ecc71"),
+        ("Neural Network (MLP)", "#e74c3c"),
     ]:
         offset = width * multiplier
-        ax.bar(x + offset, metrics_data[name]['f1'], width,
-               label=name, color=color, alpha=0.85, edgecolor='white')
+        ax.bar(x + offset, metrics_data[name]["f1"], width, label=name, color=color, alpha=0.85, edgecolor="white")
         multiplier += 1
 
-    ax.set_xlabel('Class', fontsize=11)
-    ax.set_ylabel('F1 Score', fontsize=11)
-    ax.set_title('Per-Class F1 Score Comparison', fontsize=13, fontweight='bold')
+    ax.set_xlabel("Class", fontsize=11)
+    ax.set_ylabel("F1 Score", fontsize=11)
+    ax.set_title("Per-Class F1 Score Comparison", fontsize=13, fontweight="bold")
     ax.set_xticks(x + width)
-    ax.set_xticklabels(CLASS_NAMES, fontsize=9, rotation=45, ha='right')
+    ax.set_xticklabels(CLASS_NAMES, fontsize=9, rotation=45, ha="right")
     ax.legend(fontsize=10)
     ax.set_ylim(0.5, 1.0)
-    ax.axhline(y=0.8, color='gray', linestyle='--', alpha=0.3)
+    ax.axhline(y=0.8, color="gray", linestyle="--", alpha=0.3)
     plt.tight_layout()
     fig.savefig(CHARTS_DIR / "08-per-class-performance.png")
     plt.close(fig)
     print("  ✅ Chart 8: Per-class F1 comparison")
 
     # ── Chart 9: MLP Learning Curves ──
-    mlp = results['Neural Network (MLP)']['model']
-    if hasattr(mlp, 'loss_curve_') and len(mlp.loss_curve_) > 0:
+    mlp = results["Neural Network (MLP)"]["model"]
+    if hasattr(mlp, "loss_curve_") and len(mlp.loss_curve_) > 0:
         fig, ax1 = plt.subplots(figsize=(10, 5))
-        ax1.plot(mlp.loss_curve_, linewidth=2, color='#e74c3c', label='Training loss')
-        if hasattr(mlp, 'validation_scores_') and mlp.validation_scores_:
+        ax1.plot(mlp.loss_curve_, linewidth=2, color="#e74c3c", label="Training loss")
+        if hasattr(mlp, "validation_scores_") and mlp.validation_scores_:
             ax2 = ax1.twinx()
-            ax2.plot(mlp.validation_scores_, linewidth=2, color='#2ecc71',
-                     linestyle='--', label='Validation accuracy')
-            ax2.set_ylabel('Validation Accuracy', color='#2ecc71', fontsize=11)
+            ax2.plot(mlp.validation_scores_, linewidth=2, color="#2ecc71", linestyle="--", label="Validation accuracy")
+            ax2.set_ylabel("Validation Accuracy", color="#2ecc71", fontsize=11)
 
-        ax1.set_xlabel('Iteration', fontsize=11)
-        ax1.set_ylabel('Loss', color='#e74c3c', fontsize=11)
-        ax1.set_title('Neural Network Training — Loss Curve',
-                      fontsize=13, fontweight='bold')
+        ax1.set_xlabel("Iteration", fontsize=11)
+        ax1.set_ylabel("Loss", color="#e74c3c", fontsize=11)
+        ax1.set_title("Neural Network Training — Loss Curve", fontsize=13, fontweight="bold")
         lines1, labels1 = ax1.get_legend_handles_labels()
-        if hasattr(mlp, 'validation_scores_') and mlp.validation_scores_:
+        if hasattr(mlp, "validation_scores_") and mlp.validation_scores_:
             lines2, labels2 = ax2.get_legend_handles_labels()
-            ax1.legend(lines1 + lines2, labels1 + labels2, loc='upper right')
+            ax1.legend(lines1 + lines2, labels1 + labels2, loc="upper right")
         else:
-            ax1.legend(loc='upper right')
+            ax1.legend(loc="upper right")
         plt.tight_layout()
         fig.savefig(CHARTS_DIR / "09-mlp-learning-curves.png")
         plt.close(fig)
@@ -461,8 +451,8 @@ def generate_report(results, best_name, y_test):
     report_lines.append(f"{'Model':<25} {'Accuracy':>10} {'Time (s)':>10}")
     report_lines.append("-" * 47)
     for name in results:
-        acc = results[name]['accuracy']
-        t = results[name]['time']
+        acc = results[name]["accuracy"]
+        t = results[name]["time"]
         report_lines.append(f"{name:<25} {acc:>10.4f} {t:>10.1f}")
     report_lines.append("")
     report_lines.append(f"🏆 Best Model: {best_name}")
@@ -472,10 +462,7 @@ def generate_report(results, best_name, y_test):
     # Per-class breakdown for best model
     report_lines.append(f"--- Per-Class Performance ({best_name}) ---")
     report_lines.append("")
-    cr = classification_report(
-        y_test, results[best_name]['y_pred'],
-        target_names=CLASS_NAMES, digits=4
-    )
+    cr = classification_report(y_test, results[best_name]["y_pred"], target_names=CLASS_NAMES, digits=4)
     report_lines.append(cr)
 
     report_lines.append("")
@@ -487,7 +474,7 @@ def generate_report(results, best_name, y_test):
     print(report)
 
     # Save report
-    with open(OUTPUTS_DIR / "classification_report.txt", 'w') as f:
+    with open(OUTPUTS_DIR / "classification_report.txt", "w") as f:
         f.write(report)
     print("  ✅ Report saved to outputs/classification_report.txt")
 
@@ -523,5 +510,5 @@ def main():
     print(f"{'=' * 65}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
