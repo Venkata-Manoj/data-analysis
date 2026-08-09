@@ -45,284 +45,320 @@ def step(msg):
     print(f"[{time.time() - t_start:.1f}s] {msg}")
 
 
-# ── 1. Load Data ──────────────────────────────────────────────────────────
-step("Downloading dataset...")
-DATA_PATH = DATA_DIR / "raw.csv"
-if not DATA_PATH.exists():
-    url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00381/PRSA_data_2010.1.1-2014.12.31.csv"
-    urllib.request.urlretrieve(url, DATA_PATH)
-    step("Download complete.")
-
-df = pd.read_csv(DATA_PATH)
-step(f"Loaded: {df.shape[0]} rows, {df.shape[1]} cols")
-
-# ── 2. Clean & Preprocess ─────────────────────────────────────────────────
-# Drop index column, create datetime index
-df.drop(columns=["No"], inplace=True)
-df["datetime"] = pd.to_datetime(df[["year", "month", "day", "hour"]])
-df.set_index("datetime", inplace=True)
-df.sort_index(inplace=True)
-
-# Handle NaN pm2.5 — linear interpolation (temporal)
-nan_before = df["pm2.5"].isna().sum()
-df["pm2.5"].interpolate(method="linear", inplace=True)
-df["pm2.5"].fillna(df["pm2.5"].median(), inplace=True)  # leading edge
-step(f"Filled {nan_before} NaN pm2.5 values via interpolation")
-
-# Encode wind direction
-wind_dummies = pd.get_dummies(df["cbwd"], prefix="wind")
-df = pd.concat([df.drop(columns=["cbwd"]), wind_dummies], axis=1)
-
-# Drop original date components (now in index)
-df.drop(columns=["year", "month", "day", "hour"], inplace=True)
-
-step(f"Clean shape: {df.shape[0]} rows × {df.shape[1]} features")
-step(f"Date range: {df.index.min()} → {df.index.max()}")
-
-# ── 3. Feature Engineering ─────────────────────────────────────────────────
-step("Engineering features...")
-
-# Time-based features
-df["hour_sin"] = np.sin(2 * np.pi * df.index.hour / 24)
-df["hour_cos"] = np.cos(2 * np.pi * df.index.hour / 24)
-df["month_sin"] = np.sin(2 * np.pi * df.index.month / 12)
-df["month_cos"] = np.cos(2 * np.pi * df.index.month / 12)
-df["day_of_week"] = df.index.dayofweek
-df["is_weekend"] = df["day_of_week"].isin([5, 6]).astype(int)
-df["quarter"] = df.index.quarter
-
-# Lag features (past pm2.5 values)
-for lag in [1, 3, 6, 12, 24, 48, 72]:
-    df[f"pm25_lag_{lag}h"] = df["pm2.5"].shift(lag)
-
-# Rolling statistics
-for window in [6, 12, 24, 48]:
-    df[f"pm25_roll_mean_{window}h"] = df["pm2.5"].shift(1).rolling(window).mean()
-    df[f"pm25_roll_std_{window}h"] = df["pm2.5"].shift(1).rolling(window).std()
-
-# Drop rows with NaN from lag/roll creation
-df.dropna(inplace=True)
-step(f"After feature engineering: {df.shape[0]} rows × {df.shape[1]} cols")
-step(f"Features: {[c for c in df.columns if c != 'pm2.5']}")
-
-# ── 4. Train/Test Split (Time-based) ──────────────────────────────────────
-cutoff = "2014-01-01"
-train_df = df.loc[df.index < cutoff].copy()
-test_df = df.loc[df.index >= cutoff].copy()
-
-target = "pm2.5"
-feature_cols = [c for c in df.columns if c != target]
-
-X_train = train_df[feature_cols]
-y_train = train_df[target]
-X_test = test_df[feature_cols]
-y_test = test_df[target]
-
-step(f"Train: {len(X_train)} samples ({train_df.index.min().date()} → {train_df.index.max().date()})")
-step(f"Test:  {len(X_test)} samples ({test_df.index.min().date()} → {test_df.index.max().date()})")
-
-# Scale features (tree models don't need it, but linear does)
-scaler = StandardScaler()
-X_train_scaled = scaler.fit_transform(X_train)
-X_test_scaled = scaler.transform(X_test)
-
-# ── 5. Train Models ───────────────────────────────────────────────────────
-models = OrderedDict(
-    [
-        ("Linear Regression", LinearRegression()),
-        ("Ridge (α=10)", Ridge(alpha=10)),
-        ("Random Forest", RandomForestRegressor(n_estimators=200, max_depth=15, random_state=42, n_jobs=-1)),
-        ("XGBoost", None),  # imported separately
-    ]
-)
-
-import xgboost as xgb
-
-models["XGBoost"] = xgb.XGBRegressor(
-    n_estimators=300, max_depth=8, learning_rate=0.08, subsample=0.8, colsample_bytree=0.8, random_state=42, n_jobs=-1
-)
-
-results = []
-predictions = {}
-
-for name, model in models.items():
-    step(f"Training {name}...")
-    if name in ("Linear Regression", "Ridge (α=10)"):
-        model.fit(X_train_scaled, y_train)
-        preds = model.predict(X_test_scaled)
+def load_data(path=None):
+    """Load the UCI Beijing PM2.5 dataset, downloading it if missing."""
+    if path is None:
+        data_path = DATA_DIR / "raw.csv"
+        if not data_path.exists():
+            url = "https://archive.ics.uci.edu/ml/machine-learning-databases/00381/PRSA_data_2010.1.1-2014.12.31.csv"
+            step("Downloading dataset...")
+            urllib.request.urlretrieve(url, data_path)
+            step("Download complete.")
     else:
-        model.fit(X_train, y_train)
-        preds = model.predict(X_test)
+        data_path = Path(path)
+    return pd.read_csv(data_path)
 
-    predictions[name] = preds
-    mae = mean_absolute_error(y_test, preds)
-    rmse = np.sqrt(mean_squared_error(y_test, preds))
-    r2 = r2_score(y_test, preds)
-    mape = np.mean(np.abs((y_test.values - preds) / (y_test.values + 1e-6))) * 100
-    results.append(
-        {
-            "model": name,
-            "MAE": round(mae, 2),
-            "RMSE": round(rmse, 2),
-            "R2": round(r2, 4),
-            "MAPE": round(mape, 2),
-        }
+
+def clean_and_preprocess(df):
+    """Drop index column, build datetime index, fill NaN pm2.5, encode wind.
+
+    Returns the cleaned DataFrame with a sorted ``datetime`` index.
+    """
+    df = df.copy()
+    df.drop(columns=["No"], inplace=True)
+    df["datetime"] = pd.to_datetime(df[["year", "month", "day", "hour"]])
+    df.set_index("datetime", inplace=True)
+    df.sort_index(inplace=True)
+
+    # Handle NaN pm2.5 — linear interpolation (temporal)
+    # NOTE: assignment form required under pandas Copy-on-Write; inplace chained
+    # assignment silently no-ops on pandas >= 3.0 (ChainedAssignmentError).
+    df["pm2.5"] = df["pm2.5"].interpolate(method="linear")
+    df["pm2.5"] = df["pm2.5"].fillna(df["pm2.5"].median())  # leading edge
+
+    # Encode wind direction
+    wind_dummies = pd.get_dummies(df["cbwd"], prefix="wind")
+    df = pd.concat([df.drop(columns=["cbwd"]), wind_dummies], axis=1)
+
+    # Drop original date components (now in index)
+    df.drop(columns=["year", "month", "day", "hour"], inplace=True)
+    return df
+
+
+def engineer_features(df):
+    """Add time-based, lag, and rolling features. Drops NaN rows."""
+    df = df.copy()
+    # Time-based features
+    df["hour_sin"] = np.sin(2 * np.pi * df.index.hour / 24)
+    df["hour_cos"] = np.cos(2 * np.pi * df.index.hour / 24)
+    df["month_sin"] = np.sin(2 * np.pi * df.index.month / 12)
+    df["month_cos"] = np.cos(2 * np.pi * df.index.month / 12)
+    df["day_of_week"] = df.index.dayofweek
+    df["is_weekend"] = df["day_of_week"].isin([5, 6]).astype(int)
+    df["quarter"] = df.index.quarter
+
+    # Lag features (past pm2.5 values)
+    for lag in [1, 3, 6, 12, 24, 48, 72]:
+        df[f"pm25_lag_{lag}h"] = df["pm2.5"].shift(lag)
+
+    # Rolling statistics
+    for window in [6, 12, 24, 48]:
+        df[f"pm25_roll_mean_{window}h"] = df["pm2.5"].shift(1).rolling(window).mean()
+        df[f"pm25_roll_std_{window}h"] = df["pm2.5"].shift(1).rolling(window).std()
+
+    # Drop rows with NaN from lag/roll creation
+    df.dropna(inplace=True)
+    return df
+
+
+def temporal_split(df, cutoff="2014-01-01", target="pm2.5"):
+    """Split by time: everything before cutoff trains, the rest tests."""
+    train_df = df.loc[df.index < cutoff].copy()
+    test_df = df.loc[df.index >= cutoff].copy()
+    feature_cols = [c for c in df.columns if c != target]
+    return train_df, test_df, feature_cols, target
+
+
+def build_models():
+    """Return the regression model zoo (XGBoost imported lazily)."""
+    import xgboost as xgb
+
+    models = OrderedDict(
+        [
+            ("Linear Regression", LinearRegression()),
+            ("Ridge (α=10)", Ridge(alpha=10)),
+            ("Random Forest", RandomForestRegressor(n_estimators=200, max_depth=15, random_state=42, n_jobs=-1)),
+            (
+                "XGBoost",
+                xgb.XGBRegressor(
+                    n_estimators=300,
+                    max_depth=8,
+                    learning_rate=0.08,
+                    subsample=0.8,
+                    colsample_bytree=0.8,
+                    random_state=42,
+                    n_jobs=-1,
+                ),
+            ),
+        ]
     )
-    step(f"  {name}: MAE={mae:.1f}, RMSE={rmse:.1f}, R²={r2:.4f}, MAPE={mape:.1f}%")
+    return models
 
-results_df = pd.DataFrame(results).set_index("model")
-print("\n" + results_df.to_string())
-results_df.to_csv(OUTPUTS / "model_comparison.csv")
 
-step("Saving results.json...")
-with open(OUTPUTS / "results.json", "w") as f:
-    json.dump(results, f, indent=2)
+def evaluate_regression(y_true, preds):
+    """Return MAE, RMSE, R2, MAPE metrics for a regression prediction."""
+    mae = mean_absolute_error(y_true, preds)
+    rmse = np.sqrt(mean_squared_error(y_true, preds))
+    r2 = r2_score(y_true, preds)
+    mape = np.mean(np.abs((y_true.values - preds) / (y_true.values + 1e-6))) * 100
+    return {"MAE": round(mae, 2), "RMSE": round(rmse, 2), "R2": round(r2, 4), "MAPE": round(mape, 2)}
 
-# ── 6. Charts ─────────────────────────────────────────────────────────────
-step("Generating charts...")
-best_model = min(results, key=lambda r: r["RMSE"])["model"]
-best_preds = predictions[best_model]
 
-# Chart 1: Historical Time Series (training data overview)
-fig, ax = plt.subplots(figsize=(16, 4))
-ax.plot(train_df.index, train_df[target], alpha=0.6, linewidth=0.4, label="Train (pm2.5)")
-ax.set_title("Beijing PM2.5 — Training Period (2010–2013)", fontsize=13)
-ax.set_ylabel("PM2.5 (μg/m³)")
-ax.legend(loc="upper right", ncol=2)
-plt.tight_layout()
-plt.savefig(CHARTS / "01-training-timeseries.png", dpi=150, bbox_inches="tight")
-plt.close()
+def main():
+    # ── 1. Load Data ──────────────────────────────────────────────────────────
+    df = load_data()
+    step(f"Loaded: {df.shape[0]} rows, {df.shape[1]} cols")
 
-# Chart 2: Test period — actual vs best model predictions
-fig, ax = plt.subplots(figsize=(16, 5))
-ax.plot(y_test.index, y_test.values, alpha=0.7, linewidth=0.5, label="Actual", color="#2c3e50")
-ax.plot(y_test.index, best_preds, alpha=0.7, linewidth=0.5, label=f"{best_model} (predicted)", color="#e74c3c")
-ax.set_title(f"PM2.5 Forecast — {best_model} (Test: 2014)", fontsize=13)
-ax.set_ylabel("PM2.5 (μg/m³)")
-ax.legend()
-ax.xaxis.set_major_locator(mdates.MonthLocator())
-ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
-plt.tight_layout()
-plt.savefig(CHARTS / "02-predictions-vs-actual.png", dpi=150, bbox_inches="tight")
-plt.close()
+    # ── 2. Clean & Preprocess ─────────────────────────────────────────────────
+    df = clean_and_preprocess(df)
+    step(f"Clean shape: {df.shape[0]} rows × {df.shape[1]} features")
+    step(f"Date range: {df.index.min()} → {df.index.max()}")
 
-# Chart 3: Scatter plot — predicted vs actual
-fig, axes = plt.subplots(1, 2, figsize=(12, 5))
-for idx, (name, preds) in enumerate(predictions.items()):
-    ax = axes[idx % 2]
-    ax.scatter(y_test, preds, alpha=0.3, s=3, label=name)
-    lims = [0, max(y_test.max(), preds.max())]
-    ax.plot(lims, lims, "r--", linewidth=1, alpha=0.6)
-    ax.set_xlim(lims)
-    ax.set_ylim(lims)
-    ax.set_xlabel("Actual PM2.5")
-    ax.set_ylabel("Predicted PM2.5")
-    ax.set_title(name)
-    r = results_df.loc[name, "R2"]
-    ax.text(
-        0.05,
-        0.95,
-        f"R²={r:.4f}",
-        transform=ax.transAxes,
-        va="top",
-        fontsize=11,
-        bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
-    )
-plt.tight_layout()
-plt.savefig(CHARTS / "03-scatter-predicted-vs-actual.png", dpi=150, bbox_inches="tight")
-plt.close()
+    # ── 3. Feature Engineering ─────────────────────────────────────────────────
+    step("Engineering features...")
+    df = engineer_features(df)
+    step(f"After feature engineering: {df.shape[0]} rows × {df.shape[1]} cols")
 
-# Chart 4: Model comparison bar chart
-fig, ax = plt.subplots(figsize=(10, 5))
-res = pd.DataFrame(results)
-x = np.arange(len(res))
-width = 0.25
-metrics_to_plot = ["RMSE", "MAE"]
-colors = ["#e74c3c", "#3498db"]
-for i, metric in enumerate(metrics_to_plot):
-    bars = ax.bar(x + i * width, res[metric], width, label=metric, color=colors[i])
-    for bar in bars:
+    # ── 4. Train/Test Split (Time-based) ──────────────────────────────────────
+    train_df, test_df, feature_cols, target = temporal_split(df)
+    step(f"Train: {len(train_df)} samples ({train_df.index.min().date()} → {train_df.index.max().date()})")
+    step(f"Test:  {len(test_df)} samples ({test_df.index.min().date()} → {test_df.index.max().date()})")
+
+    X_train, y_train = train_df[feature_cols], train_df[target]
+    X_test, y_test = test_df[feature_cols], test_df[target]
+
+    # Scale features (tree models don't need it, but linear does)
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled = scaler.transform(X_test)
+
+    # ── 5. Train Models ───────────────────────────────────────────────────────
+    models = build_models()
+    results = []
+    predictions = {}
+
+    for name, model in models.items():
+        step(f"Training {name}...")
+        if name in ("Linear Regression", "Ridge (α=10)"):
+            model.fit(X_train_scaled, y_train)
+            preds = model.predict(X_test_scaled)
+        else:
+            model.fit(X_train, y_train)
+            preds = model.predict(X_test)
+
+        predictions[name] = preds
+        metrics = evaluate_regression(y_test, preds)
+        metrics["model"] = name
+        results.append(metrics)
+        step(f"  {name}: MAE={metrics['MAE']}, RMSE={metrics['RMSE']}, R²={metrics['R2']}, MAPE={metrics['MAPE']}%")
+
+    results_df = pd.DataFrame(results).set_index("model")
+    print("\n" + results_df.to_string())
+    results_df.to_csv(OUTPUTS / "model_comparison.csv")
+
+    step("Saving results.json...")
+    with open(OUTPUTS / "results.json", "w") as f:
+        json.dump(results, f, indent=2)
+
+    # ── 6. Charts ─────────────────────────────────────────────────────────────
+    step("Generating charts...")
+    best_model = min(results, key=lambda r: r["RMSE"])["model"]
+    best_preds = predictions[best_model]
+
+    # Chart 1: Historical Time Series (training data overview)
+    fig, ax = plt.subplots(figsize=(16, 4))
+    ax.plot(train_df.index, train_df[target], alpha=0.6, linewidth=0.4, label="Train (pm2.5)")
+    ax.set_title("Beijing PM2.5 — Training Period (2010–2013)", fontsize=13)
+    ax.set_ylabel("PM2.5 (μg/m³)")
+    ax.legend(loc="upper right", ncol=2)
+    plt.tight_layout()
+    plt.savefig(CHARTS / "01-training-timeseries.png", dpi=150, bbox_inches="tight")
+    plt.close()
+
+    # Chart 2: Test period — actual vs best model predictions
+    fig, ax = plt.subplots(figsize=(16, 5))
+    ax.plot(y_test.index, y_test.values, alpha=0.7, linewidth=0.5, label="Actual", color="#2c3e50")
+    ax.plot(y_test.index, best_preds, alpha=0.7, linewidth=0.5, label=f"{best_model} (predicted)", color="#e74c3c")
+    ax.set_title(f"PM2.5 Forecast — {best_model} (Test: 2014)", fontsize=13)
+    ax.set_ylabel("PM2.5 (μg/m³)")
+    ax.legend()
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b"))
+    plt.tight_layout()
+    plt.savefig(CHARTS / "02-predictions-vs-actual.png", dpi=150, bbox_inches="tight")
+    plt.close()
+
+    # Chart 3: Scatter plot — predicted vs actual
+    fig, axes = plt.subplots(1, 2, figsize=(12, 5))
+    for idx, (name, preds) in enumerate(predictions.items()):
+        ax = axes[idx % 2]
+        ax.scatter(y_test, preds, alpha=0.3, s=3, label=name)
+        lims = [0, max(y_test.max(), preds.max())]
+        ax.plot(lims, lims, "r--", linewidth=1, alpha=0.6)
+        ax.set_xlim(lims)
+        ax.set_ylim(lims)
+        ax.set_xlabel("Actual PM2.5")
+        ax.set_ylabel("Predicted PM2.5")
+        ax.set_title(name)
+        r = results_df.loc[name, "R2"]
         ax.text(
-            bar.get_x() + bar.get_width() / 2, bar.get_height() + 1, f"{bar.get_height():.1f}", ha="center", fontsize=9
+            0.05,
+            0.95,
+            f"R²={r:.4f}",
+            transform=ax.transAxes,
+            va="top",
+            fontsize=11,
+            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
         )
-ax.set_xticks(x + width / 2)
-ax.set_xticklabels(res["model"], fontsize=10)
-ax.set_ylabel("Error (μg/m³)")
-ax.set_title("Model Comparison — Error Metrics (lower is better)")
-ax.legend()
-plt.tight_layout()
-plt.savefig(CHARTS / "04-model-comparison.png", dpi=150, bbox_inches="tight")
-plt.close()
+    plt.tight_layout()
+    plt.savefig(CHARTS / "03-scatter-predicted-vs-actual.png", dpi=150, bbox_inches="tight")
+    plt.close()
 
-# Chart 5: Feature importance (XGBoost)
-xgb_model = models["XGBoost"]
-importances = xgb_model.feature_importances_
-feat_imp = pd.DataFrame({"feature": feature_cols, "importance": importances})
-feat_imp.sort_values("importance", ascending=False, inplace=True)
-feat_imp_top = feat_imp.head(15)
+    # Chart 4: Model comparison bar chart
+    fig, ax = plt.subplots(figsize=(10, 5))
+    res = pd.DataFrame(results)
+    x = np.arange(len(res))
+    width = 0.25
+    metrics_to_plot = ["RMSE", "MAE"]
+    colors = ["#e74c3c", "#3498db"]
+    for i, metric in enumerate(metrics_to_plot):
+        bars = ax.bar(x + i * width, res[metric], width, label=metric, color=colors[i])
+        for bar in bars:
+            ax.text(
+                bar.get_x() + bar.get_width() / 2,
+                bar.get_height() + 1,
+                f"{bar.get_height():.1f}",
+                ha="center",
+                fontsize=9,
+            )
+    ax.set_xticks(x + width / 2)
+    ax.set_xticklabels(res["model"], fontsize=10)
+    ax.set_ylabel("Error (μg/m³)")
+    ax.set_title("Model Comparison — Error Metrics (lower is better)")
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig(CHARTS / "04-model-comparison.png", dpi=150, bbox_inches="tight")
+    plt.close()
 
-fig, ax = plt.subplots(figsize=(10, 6))
-sns.barplot(data=feat_imp_top, y="feature", x="importance", palette="viridis", ax=ax)
-ax.set_title("XGBoost — Top 15 Feature Importances")
-ax.set_xlabel("Importance")
-plt.tight_layout()
-plt.savefig(CHARTS / "05-feature-importance.png", dpi=150, bbox_inches="tight")
-plt.close()
-feat_imp.to_csv(OUTPUTS / "feature_importance.csv", index=False)
+    # Chart 5: Feature importance (XGBoost)
+    xgb_model = models["XGBoost"]
+    importances = xgb_model.feature_importances_
+    feat_imp = pd.DataFrame({"feature": feature_cols, "importance": importances})
+    feat_imp.sort_values("importance", ascending=False, inplace=True)
+    feat_imp_top = feat_imp.head(15)
 
-# Chart 6: Residuals distribution
-fig, ax = plt.subplots(figsize=(10, 5))
-for name, preds in predictions.items():
-    residuals = y_test.values - preds
-    ax.hist(residuals, bins=80, alpha=0.4, label=name)
-ax.set_title("Residuals Distribution (Actual − Predicted)")
-ax.set_xlabel("Residual (μg/m³)")
-ax.legend()
-plt.tight_layout()
-plt.savefig(CHARTS / "06-residuals-distribution.png", dpi=150, bbox_inches="tight")
-plt.close()
+    fig, ax = plt.subplots(figsize=(10, 6))
+    sns.barplot(data=feat_imp_top, y="feature", x="importance", palette="viridis", ax=ax)
+    ax.set_title("XGBoost — Top 15 Feature Importances")
+    ax.set_xlabel("Importance")
+    plt.tight_layout()
+    plt.savefig(CHARTS / "05-feature-importance.png", dpi=150, bbox_inches="tight")
+    plt.close()
+    feat_imp.to_csv(OUTPUTS / "feature_importance.csv", index=False)
 
-# Chart 7: Hourly seasonality
-test_df_vis = test_df.copy()
-test_df_vis["hour"] = y_test.index.hour
-test_df_vis["actual"] = y_test
-test_df_vis["predicted"] = best_preds
-hourly = test_df_vis.groupby("hour")[["actual", "predicted"]].mean()
+    # Chart 6: Residuals distribution
+    fig, ax = plt.subplots(figsize=(10, 5))
+    for name, preds in predictions.items():
+        residuals = y_test.values - preds
+        ax.hist(residuals, bins=80, alpha=0.4, label=name)
+    ax.set_title("Residuals Distribution (Actual − Predicted)")
+    ax.set_xlabel("Residual (μg/m³)")
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig(CHARTS / "06-residuals-distribution.png", dpi=150, bbox_inches="tight")
+    plt.close()
 
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(hourly.index, hourly["actual"], "o-", label="Actual (avg)", linewidth=2)
-ax.plot(hourly.index, hourly["predicted"], "s--", label="Predicted (avg)", linewidth=2)
-ax.set_title("Average Hourly PM2.5 Pattern (Test Set)")
-ax.set_xlabel("Hour of Day")
-ax.set_ylabel("PM2.5 (μg/m³)")
-ax.set_xticks(range(0, 24, 3))
-ax.legend()
-plt.tight_layout()
-plt.savefig(CHARTS / "07-hourly-pattern.png", dpi=150, bbox_inches="tight")
-plt.close()
+    # Chart 7: Hourly seasonality
+    test_df_vis = test_df.copy()
+    test_df_vis["hour"] = y_test.index.hour
+    test_df_vis["actual"] = y_test
+    test_df_vis["predicted"] = best_preds
+    hourly = test_df_vis.groupby("hour")[["actual", "predicted"]].mean()
 
-# Chart 8: Weekly pattern
-test_df_vis["dow"] = y_test.index.dayofweek
-weekly = test_df_vis.groupby("dow")[["actual", "predicted"]].mean()
-dow_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(hourly.index, hourly["actual"], "o-", label="Actual (avg)", linewidth=2)
+    ax.plot(hourly.index, hourly["predicted"], "s--", label="Predicted (avg)", linewidth=2)
+    ax.set_title("Average Hourly PM2.5 Pattern (Test Set)")
+    ax.set_xlabel("Hour of Day")
+    ax.set_ylabel("PM2.5 (μg/m³)")
+    ax.set_xticks(range(0, 24, 3))
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig(CHARTS / "07-hourly-pattern.png", dpi=150, bbox_inches="tight")
+    plt.close()
 
-fig, ax = plt.subplots(figsize=(10, 5))
-ax.plot(weekly.index, weekly["actual"], "o-", label="Actual (avg)", linewidth=2)
-ax.plot(weekly.index, weekly["predicted"], "s--", label="Predicted (avg)", linewidth=2)
-ax.set_title("Average Daily PM2.5 Pattern (Test Set)")
-ax.set_xlabel("Day of Week")
-ax.set_ylabel("PM2.5 (μg/m³)")
-ax.set_xticks(range(7))
-ax.set_xticklabels(dow_labels)
-ax.legend()
-plt.tight_layout()
-plt.savefig(CHARTS / "08-weekly-pattern.png", dpi=150, bbox_inches="tight")
-plt.close()
+    # Chart 8: Weekly pattern
+    test_df_vis["dow"] = y_test.index.dayofweek
+    weekly = test_df_vis.groupby("dow")[["actual", "predicted"]].mean()
+    dow_labels = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"]
 
-# ── 7. Summary ─────────────────────────────────────────────────────────────
-duration = time.time() - t_start
-elapsed = f"{duration // 60:.0f}m {duration % 60:.0f}s"
-summary = f"""# PM2.5 Air Quality Forecasting — Summary
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.plot(weekly.index, weekly["actual"], "o-", label="Actual (avg)", linewidth=2)
+    ax.plot(weekly.index, weekly["predicted"], "s--", label="Predicted (avg)", linewidth=2)
+    ax.set_title("Average Daily PM2.5 Pattern (Test Set)")
+    ax.set_xlabel("Day of Week")
+    ax.set_ylabel("PM2.5 (μg/m³)")
+    ax.set_xticks(range(7))
+    ax.set_xticklabels(dow_labels)
+    ax.legend()
+    plt.tight_layout()
+    plt.savefig(CHARTS / "08-weekly-pattern.png", dpi=150, bbox_inches="tight")
+    plt.close()
+
+    # ── 7. Summary ─────────────────────────────────────────────────────────────
+    duration = time.time() - t_start
+    elapsed = f"{duration // 60:.0f}m {duration % 60:.0f}s"
+    summary = f"""# PM2.5 Air Quality Forecasting — Summary
 
 **Execution time:** {elapsed}
 
@@ -340,10 +376,10 @@ summary = f"""# PM2.5 Air Quality Forecasting — Summary
 | Model | MAE | RMSE | R² | MAPE |
 |-------|-----|------|----|------|
 """
-for r in results:
-    summary += f"| {r['model']} | {r['MAE']} | {r['RMSE']} | {r['R2']} | {r['MAPE']}% |\n"
+    for r in results:
+        summary += f"| {r['model']} | {r['MAE']} | {r['RMSE']} | {r['R2']} | {r['MAPE']}% |\n"
 
-summary += f"""
+    summary += f"""
 **Best model:** {best_model} (RMSE={min(r["RMSE"] for r in results)})
 
 ## Key Insights
@@ -356,8 +392,12 @@ summary += f"""
 - Hourly and weekly seasonal patterns are preserved in predictions
 """
 
-with open(OUTPUTS / "results_summary.md", "w") as f:
-    f.write(summary)
+    with open(OUTPUTS / "results_summary.md", "w") as f:
+        f.write(summary)
 
-print(summary)
-step(f"✅ Complete in {elapsed}")
+    print(summary)
+    step(f"✅ Complete in {elapsed}")
+
+
+if __name__ == "__main__":
+    main()

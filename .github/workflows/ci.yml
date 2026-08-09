@@ -32,6 +32,27 @@ jobs:
       - name: Format check with ruff
         run: ruff format --check
 
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest
+          pip install -r wine-quality-classification/requirements.txt
+          pip install -r pm25-air-quality-forecasting/requirements.txt
+
+      - name: Run tests
+        run: python -m pytest tests/ -v --tb=short
+
   validate:
     name: Validate project structure
     runs-on: ubuntu-latest
