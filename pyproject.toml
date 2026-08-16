@@ -38,5 +38,6 @@ line-ending = "auto"
 # ML convention: X_train / y_test uppercase names are idiomatic in sklearn code.
 "wine-quality-classification/analysis.py" = ["E402", "E501", "N803", "N806"]
 "pm25-air-quality-forecasting/analysis.py" = ["E402", "E501", "N803", "N806"]
+"recommender-system-movielens/analysis.py" = ["E402", "E501", "N803", "N806"]
 "tests/*.py" = ["N803", "N806"]
 

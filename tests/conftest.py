@@ -13,6 +13,7 @@ from pathlib import Path
 PROJECTS = {
     "wine_analysis": "wine-quality-classification",
     "pm25_analysis": "pm25-air-quality-forecasting",
+    "recommender_analysis": "recommender-system-movielens",
 }
 
 for module_name, project_dir in PROJECTS.items():

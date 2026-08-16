@@ -158,6 +158,31 @@ A complete image classification pipeline comparing traditional ML (Random Forest
 
 | Key finding | The MLP outperforms traditional methods, but struggles with visually similar classes (Shirt vs. T-shirt/top). Items with distinct silhouettes (Trouser, Bag, Boot) achieve near-perfect F1 (>0.90). |
 
+### Project 8: Recommender System - MovieLens 100k
+
+**Directory:** [`recommender-system-movielens/`](recommender-system-movielens/)
+
+The portfolio's first **ranking and personalization** project, built on the classic **MovieLens 100k** dataset (100,000 ratings from 943 users across 1,682 movies). It compares four recommendation approaches on a held-out 20% test split and ships a working Top-N recommender. This is a different problem family from the regression, classification, NLP, computer-vision, clustering, and topic-modeling work in Projects 1-7.
+
+| Detail | Value |
+|--------|-------|
+| Technique | Biased matrix factorization (Funk SVD), User/Item KNN collaborative filtering, bias baseline |
+| Dataset | [MovieLens 100k](https://grouplens.org/datasets/movielens/100k/) (GroupLens) |
+| Evaluation | RMSE, MAE on a seeded 20% holdout |
+| Tools | Pandas, NumPy, Scikit-learn, Matplotlib |
+| Status | Complete |
+
+**Results (20% holdout):**
+
+| Model | RMSE | MAE |
+|-------|------|-----|
+| **Biased SVD (50 factors)** | **0.9262** | **0.7248** |
+| Baseline (bias) | 0.9607 | 0.7530 |
+| ItemKNN (k=40) | 0.9869 | 0.7856 |
+| UserKNN (k=40) | 0.9931 | 0.7894 |
+
+| Key finding | The biased matrix factorization (Funk SVD with global + user + item bias and 50 latent factors) clearly beats the standalone bias baseline and both KNN variants. Raw bias offsets capture a lot, but learning latent factors closes the remaining gap. KNN helps only marginally here because MovieLens 100k is dense enough that global structure dominates - matrix factorization scales and generalizes far better on colder catalogs. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -228,6 +253,16 @@ A complete image classification pipeline comparing traditional ML (Random Forest
 |:---:|:---:|
 | ![Confidence histogram](topic-modeling-newsgroups/charts/05-topic-confidence-histogram.png) | ![3D topic space](topic-modeling-newsgroups/charts/06-3d-topic-space.png) |
 
+### Recommender System - Charts
+
+| Rating Distribution | Model Comparison |
+|:---:|:---:|
+| ![Distribution](recommender-system-movielens/charts/01-rating-distribution.png) | ![Comparison](recommender-system-movielens/charts/05-model-comparison.png) |
+
+| SVD Training Curve | Top-10 Recommendations |
+|:---:|:---:|
+| ![Training](recommender-system-movielens/charts/06-svd-training-curve.png) | ![Top picks](recommender-system-movielens/charts/08-top-recommendations.png) |
+
 ---
 
 ## Quick Start
@@ -268,6 +303,11 @@ python topic_modeling.py
 cd fashion-mnist-classification
 python -m venv .venv
 source .venv/bin/activate
+pip install -r requirements.txt
+python analysis.py
+
+# Project 8: Recommender System - MovieLens 100k
+cd recommender-system-movielens
 pip install -r requirements.txt
 python analysis.py
 ```
