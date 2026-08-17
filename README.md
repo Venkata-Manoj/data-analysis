@@ -183,6 +183,31 @@ The portfolio's first **ranking and personalization** project, built on the clas
 
 | Key finding | The biased matrix factorization (Funk SVD with global + user + item bias and 50 latent factors) clearly beats the standalone bias baseline and both KNN variants. Raw bias offsets capture a lot, but learning latent factors closes the remaining gap. KNN helps only marginally here because MovieLens 100k is dense enough that global structure dominates - matrix factorization scales and generalizes far better on colder catalogs. |
 
+### Project 9: Credit Card Fraud Detection - Anomaly Detection
+
+The portfolio's first **anomaly detection / extreme-imbalance** project, built on the canonical Credit Card Fraud Detection dataset (284,807 transactions, 492 fraud, **0.172%**). It compares **unsupervised** anomaly detectors - which need no fraud labels at training time - against a **supervised** baseline that uses labels. This is a different problem family from the regression, classification, NLP, computer-vision, clustering, topic-modeling, and recommender work in Projects 1-8.
+
+| Detail | Value |
+|--------|-------|
+| Technique | Isolation Forest, Local Outlier Factor, One-Class SVM (unsupervised); class-weighted Logistic Regression (supervised) |
+| Dataset | [Credit Card Fraud Detection](https://www.openml.org/d/1597) (OpenML, ULB/MLG) - 284,807 rows, 30 features, 0.172% fraud |
+| Evaluation | ROC-AUC, Average Precision, Precision@k (imbalance-appropriate) |
+| Tools | Pandas, NumPy, Scikit-learn, Matplotlib |
+| Status | Complete |
+
+**Representative results (20% holdout, seeded):**
+
+| Model | ROC-AUC | Avg Precision | Precision@k |
+|-------|---------|---------------|-------------|
+| **Isolation Forest** | **0.953** | **0.180** | **0.306** |
+| One-Class SVM | 0.954 | 0.120 | 0.153 |
+| Local Outlier Factor | 0.485 | 0.002 | 0.000 |
+| Logistic Regression (supervised) | 0.971 | 0.718 | 0.059* |
+
+\* Supervised precision is low because the model casts a wide net at the 0.5 threshold; with cost-sensitive thresholding the alert budget can be tuned.
+
+| Key finding | Unsupervised detectors surface fraud using only the *shape* of normal activity - Isolation Forest and One-Class SVM reach ~0.95 ROC-AUC with zero labels - while the supervised model shows the ceiling when labels exist. LOF in novelty mode underperforms here, a useful honest signal about detector-vs-scale fit. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -263,6 +288,16 @@ The portfolio's first **ranking and personalization** project, built on the clas
 |:---:|:---:|
 | ![Training](recommender-system-movielens/charts/06-svd-training-curve.png) | ![Top picks](recommender-system-movielens/charts/08-top-recommendations.png) |
 
+### Fraud Detection - Charts
+
+| Class Imbalance | Detector ROC Curves |
+|:---:|:---:|
+| ![Imbalance](anomaly-detection-fraud/charts/01-class-imbalance.png) | ![ROC](anomaly-detection-fraud/charts/05-detector-roc-curves.png) |
+
+| Precision@k | Model Comparison |
+|:---:|:---:|
+| ![Precision@k](anomaly-detection-fraud/charts/07-precision-at-k.png) | ![Comparison](anomaly-detection-fraud/charts/08-model-comparison.png) |
+
 ---
 
 ## Quick Start
@@ -308,6 +343,11 @@ python analysis.py
 
 # Project 8: Recommender System - MovieLens 100k
 cd recommender-system-movielens
+pip install -r requirements.txt
+python analysis.py
+
+# Project 9: Credit Card Fraud Detection - Anomaly Detection
+cd anomaly-detection-fraud
 pip install -r requirements.txt
 python analysis.py
 ```
