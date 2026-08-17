@@ -39,5 +39,6 @@ line-ending = "auto"
 "wine-quality-classification/analysis.py" = ["E402", "E501", "N803", "N806"]
 "pm25-air-quality-forecasting/analysis.py" = ["E402", "E501", "N803", "N806"]
 "recommender-system-movielens/analysis.py" = ["E402", "E501", "N803", "N806"]
+"anomaly-detection-fraud/analysis.py" = ["E402", "E501", "N803", "N806"]
 "tests/*.py" = ["N803", "N806"]
 

@@ -50,6 +50,7 @@ jobs:
           pip install -r wine-quality-classification/requirements.txt
           pip install -r pm25-air-quality-forecasting/requirements.txt
           pip install -r recommender-system-movielens/requirements.txt
+          pip install -r anomaly-detection-fraud/requirements.txt
 
       - name: Run tests
         run: python -m pytest tests/ -v --tb=short
@@ -67,7 +68,7 @@ jobs:
 
       - name: Check project directories
         run: |
-          for project in customer-rfm-segmentation nlp-sentiment-analysis house-price-prediction wine-quality-classification pm25-air-quality-forecasting topic-modeling-newsgroups recommender-system-movielens; do
+          for project in customer-rfm-segmentation nlp-sentiment-analysis house-price-prediction wine-quality-classification pm25-air-quality-forecasting topic-modeling-newsgroups recommender-system-movielens anomaly-detection-fraud; do
             if [ -d "$project" ]; then
               echo "✅ $project directory exists"
             else
@@ -93,7 +94,8 @@ jobs:
                        wine-quality-classification/analysis.py wine-quality-classification/README.md \
                        pm25-air-quality-forecasting/analysis.py pm25-air-quality-forecasting/README.md \
                        topic-modeling-newsgroups/topic_modeling.py topic-modeling-newsgroups/README.md \
-                       recommender-system-movielens/analysis.py recommender-system-movielens/README.md; do
+                       recommender-system-movielens/analysis.py recommender-system-movielens/README.md \
+                       anomaly-detection-fraud/analysis.py anomaly-detection-fraud/README.md; do
             if [ -f "$file" ]; then
               echo "✅ $file exists"
             else
@@ -106,7 +108,7 @@ jobs:
       - name: Check Python syntax
         run: |
           errors=0
-          for pyfile in customer-rfm-segmentation/app.py nlp-sentiment-analysis/app.py house-price-prediction/analysis.py wine-quality-classification/analysis.py pm25-air-quality-forecasting/analysis.py topic-modeling-newsgroups/topic_modeling.py recommender-system-movielens/analysis.py; do
+          for pyfile in customer-rfm-segmentation/app.py nlp-sentiment-analysis/app.py house-price-prediction/analysis.py wine-quality-classification/analysis.py pm25-air-quality-forecasting/analysis.py topic-modeling-newsgroups/topic_modeling.py recommender-system-movielens/analysis.py anomaly-detection-fraud/analysis.py; do
             if python -c "compile(open('$pyfile').read(), '$pyfile', 'exec')" 2>/dev/null; then
               echo "✅ $pyfile — valid syntax"
             else
