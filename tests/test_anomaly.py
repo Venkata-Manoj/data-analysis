@@ -106,3 +106,71 @@ def test_run_all_returns_expected_keys(synthetic):
         assert "roc_auc" in result["detectors"][name]["metrics"]
     assert "roc_auc" in result["supervised"]
     assert result["pca_explained"][-1] == pytest.approx(1.0)  # PCA cumulative ends at 1
+
+
+# --------------------------------------------------------------------------- #
+# Cost-sensitive alert-budget optimization
+# --------------------------------------------------------------------------- #
+def test_cost_sensitive_threshold_flags_budget_fraction(synthetic):
+    X, y = synthetic
+    X_tr, X_te, y_tr, y_te = ad.split_data(X, y, random_state=9)
+    clf = ad.fit_isolation_forest(X_tr, n_estimators=50, random_state=10)
+    scores = ad.anomaly_scores(clf, X_te)
+    n = len(y_te)
+    pt = ad.cost_sensitive_threshold(y_te, scores, budget_frac=0.1)
+    # Review rate should be ~10% of the volume (rounding allows +/- 1 alert).
+    assert pt["n_alerts"] / n == pytest.approx(0.1, abs=1 / n)
+
+
+def test_cost_sensitive_threshold_catches_more_fraud_at_higher_budget(synthetic):
+    X, y = synthetic
+    X_tr, X_te, y_tr, y_te = ad.split_data(X, y, random_state=11)
+    clf = ad.fit_isolation_forest(X_tr, n_estimators=50, random_state=12)
+    scores = ad.anomaly_scores(clf, X_te)
+    low = ad.cost_sensitive_threshold(y_te, scores, budget_frac=0.02)
+    high = ad.cost_sensitive_threshold(y_te, scores, budget_frac=0.2)
+    # A larger review budget cannot catch fewer fraud (it's a superset of alerts).
+    assert high["n_fraud_caught"] >= low["n_fraud_caught"]
+    assert high["recall"] >= low["recall"]
+    # Precision can drop as the budget grows — assert it stays within [0,1].
+    assert 0.0 <= high["precision"] <= 1.0
+
+
+def test_cost_sensitive_threshold_perfect_on_separable(synthetic):
+    X, y = synthetic
+    X_tr, X_te, y_tr, y_te = ad.split_data(X, y, random_state=13)
+    clf = ad.fit_isolation_forest(X_tr, n_estimators=50, random_state=14)
+    scores = ad.anomaly_scores(clf, X_te)
+    # Budget sized to the exact number of fraud -> catching all fraud gives recall 1.
+    n_fraud = int(y_te.sum())
+    n = len(y_te)
+    pt = ad.cost_sensitive_threshold(y_te, scores, budget_frac=n_fraud / n)
+    assert pt["n_alerts"] >= n_fraud
+    assert pt["n_fraud_caught"] == n_fraud
+    assert pt["recall"] == pytest.approx(1.0)
+
+
+def test_cost_sensitive_threshold_rejects_empty():
+    with pytest.raises(ValueError):
+        ad.cost_sensitive_threshold(np.array([]), np.array([]), budget_frac=0.1)
+
+
+def test_alert_budget_sweep_returns_all_budgets(synthetic):
+    X, y = synthetic
+    X_tr, X_te, y_tr, y_te = ad.split_data(X, y, random_state=15)
+    clf = ad.fit_isolation_forest(X_tr, n_estimators=50, random_state=16)
+    scores = ad.anomaly_scores(clf, X_te)
+    sweep = ad.alert_budget_sweep(y_te, scores, budgets=(0.01, 0.05, 0.1))
+    assert [pt["budget"] for pt in sweep] == [0.01, 0.05, 0.1]
+    for pt in sweep:
+        assert "precision" in pt and "recall" in pt
+        assert "threshold" in pt
+
+
+def test_run_all_includes_alert_budget(synthetic):
+    X, y = synthetic
+    result = ad.run_all(X, y, random_state=17)
+    assert "alert_budget" in result
+    assert set(result["alert_budget"]) == {"IsolationForest", "LOF", "OneClassSVM", "LogReg"}
+    for name in result["alert_budget"]:
+        assert len(result["alert_budget"][name]) > 0
