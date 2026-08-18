@@ -189,9 +189,9 @@ The portfolio's first **anomaly detection / extreme-imbalance** project, built o
 
 | Detail | Value |
 |--------|-------|
-| Technique | Isolation Forest, Local Outlier Factor, One-Class SVM (unsupervised); class-weighted Logistic Regression (supervised) |
+| Technique | Isolation Forest, Local Outlier Factor, One-Class SVM (unsupervised); class-weighted Logistic Regression (supervised); **cost-sensitive alert-budget optimization** |
 | Dataset | [Credit Card Fraud Detection](https://www.openml.org/d/1597) (OpenML, ULB/MLG) - 284,807 rows, 30 features, 0.172% fraud |
-| Evaluation | ROC-AUC, Average Precision, Precision@k (imbalance-appropriate) |
+| Evaluation | ROC-AUC, Average Precision, Precision@k, **fixed-budget precision/recall sweep** (imbalance-appropriate) |
 | Tools | Pandas, NumPy, Scikit-learn, Matplotlib |
 | Status | Complete |
 

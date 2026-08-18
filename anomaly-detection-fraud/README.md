@@ -24,6 +24,12 @@ recommender work in Projects 1-8.
   as the "if you had labels" ceiling.
 - Ranks every method with **ROC-AUC**, **Average Precision**, and
   **Precision@k** (k = the fraud alert budget).
+- **Cost-sensitive alert-budget optimization (new):** converts the detector
+  scores into an actionable policy by sweeping fixed manual-review volumes
+  (0.1%-10% of transactions) and reporting precision/recall at each operating
+  point. This answers "if a review team can check X% of volume, how much fraud
+  do we catch at what precision?" - the question a lean fraud team actually
+  operates on. Writes `outputs/alert_budget.md`.
 - Generates 8 charts (imbalance, amount distribution, feature boxplots, PCA
   variance, ROC curves, PR curves, Precision@k, model comparison).
 - Writes `outputs/results_summary.md` with the headline metrics.
@@ -52,7 +58,8 @@ python -m pip install -r requirements.txt
 python analysis.py
 ```
 
-Outputs land in `charts/` (8 PNGs) and `outputs/results_summary.md`.
+Outputs land in `charts/` (8 PNGs), `outputs/results_summary.md`, and
+`outputs/alert_budget.md` (the cost-sensitive operating-point sweep).
 
 ## Results
 
@@ -71,8 +78,9 @@ detection.
 
 ## Future improvements
 
-- Add cost-sensitive thresholding / alert-budget optimization (maximize
-  Precision@k for a fixed review team size).
+- ~~Add cost-sensitive thresholding / alert-budget optimization (maximize
+  Precision@k for a fixed review team size).~~ **Implemented** - see
+  `cost_sensitive_threshold`, `alert_budget_sweep`, and `outputs/alert_budget.md`.
 - Try autoencoders / deep SVDD for learned anomaly representations.
 - Use the `Time` feature for temporal drift / concept-shift analysis.
 - Compare against gradient-boosted supervised models (XGBoost, LightGBM).
