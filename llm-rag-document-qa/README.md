@@ -83,8 +83,10 @@ import requests
 def generate(query: str, passages: list[str]) -> str:
     context = "\n\n".join(passages)
     prompt = f"Answer using ONLY the context.\n\nContext:\n{context}\n\nQuestion: {query}"
-    r = requests.post("http://localhost:11434/api/generate",
-                      json={"model": "llama3", "prompt": prompt, "stream": False})
+    r = requests.post(
+        "http://localhost:11434/api/generate",
+        json={"model": "llama3", "prompt": prompt, "stream": False},
+    )
     return r.json()["response"]
 ```
 
