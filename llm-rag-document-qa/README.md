@@ -25,6 +25,7 @@ for turning it into full generative QA.
 | Technique | BM25 + FAISS dense index + Reciprocal Rank Fusion, extractive QA |
 | Dataset | Built-in 16-document AI/ML/LLM corpus (no download, deterministic) |
 | Tools | Python, scikit-learn, FAISS, rank_bm25, Matplotlib |
+| Optional | sentence-transformers (only if you set `RAG_TRANSFORMER=1`) |
 | Evaluation | Recall@k, MRR, per-query latency, answer grounding |
 | Status | Complete |
 
