@@ -15,6 +15,7 @@ PROJECTS = {
     "pm25_analysis": "pm25-air-quality-forecasting",
     "recommender_analysis": "recommender-system-movielens",
     "anomaly_analysis": "anomaly-detection-fraud",
+    "rag_analysis": "llm-rag-document-qa",
 }
 
 for module_name, project_dir in PROJECTS.items():
