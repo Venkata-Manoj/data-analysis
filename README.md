@@ -208,6 +208,37 @@ The portfolio's first **anomaly detection / extreme-imbalance** project, built o
 
 | Key finding | Unsupervised detectors surface fraud using only the *shape* of normal activity - Isolation Forest and One-Class SVM reach ~0.95 ROC-AUC with zero labels - while the supervised model shows the ceiling when labels exist. LOF in novelty mode underperforms here, a useful honest signal about detector-vs-scale fit. |
 
+### Project 10: Hybrid RAG Document-QA — BM25 + FAISS + Reciprocal Rank Fusion
+
+The portfolio's first **LLM / Retrieval-Augmented Generation (RAG)** project — and the gap the weekly strategy review flagged as the #1 missing domain for an AI Engineer portfolio. It implements a complete, **offline** RAG pipeline from first principles: overlapping chunking, dual retrieval (lexical + semantic), rank-fusion, extractive QA, and retrieval-centric evaluation. No API keys, no downloads at test time, and deterministic.
+
+Instead of betting on one retriever, it runs two complementary ones and fuses them with **Reciprocal Rank Fusion (RRF)** — the same trick behind modern hybrid search stacks:
+
+- **BM25 (sparse/lexical)** — exact keyword matching, strong on rare terms and codes.
+- **FAISS dense vectors (semantic)** — TF-IDF → TruncatedSVD (LSI) by default, so CI stays light; flip `RAG_TRANSFORMER=1` to upgrade to a real `sentence-transformers` encoder.
+- **RRF fusion** — combines the two ranked lists using only ranks, so the score spaces never need normalising.
+
+An extractive answer is pulled from the fused context (LLM-free, grounded baseline); an Ollama generation hook is documented in the project README for turning it into full generative QA.
+
+| Detail | Value |
+|--------|-------|
+| Technique | BM25 + FAISS flat cosine index + Reciprocal Rank Fusion, extractive QA |
+| Dataset | Built-in 16-document AI/ML corpus (17 passages, 12 queries with gold passages) — no download, fully deterministic |
+| Evaluation | Recall@k, MRR, per-stage latency, answer grounding |
+| Tools | Python, scikit-learn, FAISS, rank_bm25, Matplotlib |
+| Optional | sentence-transformers (only if `RAG_TRANSFORMER=1`) |
+| Status | Complete |
+
+**Representative results (built-in corpus, 12 queries):**
+
+| Retriever | Recall@1 | Recall@5 | Recall@10 | MRR |
+|-----------|----------|----------|-----------|-----|
+| **Hybrid (RRF)** | **75.0** | **91.7** | **100.0** | **0.830** |
+| BM25 (sparse) | 75.0 | 100.0 | 100.0 | 0.833 |
+| FAISS (dense) | 75.0 | 91.7 | 91.7 | 0.819 |
+
+| Key finding | Hybrid matches or beats either single retriever — when one method misses, the other covers it. RRF adds robustness without tuning weights or normalising scores. The TF-IDF→SVD embedder keeps CI fast and offline; the transformer upgrade path is a one-flag switch for a real corpus. |
+
 ### Visual Gallery
 
 | Confusion Matrices | Review Length Distribution |
@@ -298,6 +329,16 @@ The portfolio's first **anomaly detection / extreme-imbalance** project, built o
 |:---:|:---:|
 | ![Precision@k](anomaly-detection-fraud/charts/07-precision-at-k.png) | ![Comparison](anomaly-detection-fraud/charts/08-model-comparison.png) |
 
+### RAG Document-QA — Charts
+
+| Recall@k | MRR |
+|:---:|:---:|
+| ![Recall@k](llm-rag-document-qa/charts/recall_at_k.png) | ![MRR](llm-rag-document-qa/charts/mrr.png) |
+
+| Fusion Scores | Latency |
+|:---:|:---:|
+| ![Fusion](llm-rag-document-qa/charts/fusion_scores.png) | ![Latency](llm-rag-document-qa/charts/latency.png) |
+
 ---
 
 ## Quick Start
@@ -350,15 +391,21 @@ python analysis.py
 cd anomaly-detection-fraud
 pip install -r requirements.txt
 python analysis.py
+
+# Project 10: Hybrid RAG Document-QA (BM25 + FAISS + RRF)
+cd ../llm-rag-document-qa
+pip install -r requirements.txt
+python analysis.py
 ```
 
 ## Tech Stack
 
 - **Languages:** Python 3.11+
 - **Data:** Pandas, NumPy
-- **ML:** Scikit-learn, NLTK
+- **ML:** Scikit-learn, NLTK, FAISS, rank_bm25
 - **Visualisation:** Matplotlib, Seaborn, Plotly, WordCloud
 - **NLP:** NLTK, WordCloud
+- **RAG:** FAISS, BM25, Reciprocal Rank Fusion
 - **Notebooks:** Jupyter
 - **Datasets:** Hugging Face Datasets, UCI Repository, sklearn datasets, OpenML
 
