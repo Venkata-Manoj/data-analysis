@@ -15,29 +15,77 @@ from sklearn.linear_model import LogisticRegression
 from sklearn.metrics import accuracy_score, confusion_matrix
 from sklearn.naive_bayes import MultinomialNB
 
+# Minimal stopwords — works offline (no nltk data download needed in CI).
+_FALLBACK_STOP_WORDS = {
+    "the",
+    "and",
+    "was",
+    "is",
+    "a",
+    "an",
+    "with",
+    "for",
+    "this",
+    "that",
+    "very",
+    "more",
+    "about",
+    "are",
+    "were",
+    "been",
+    "have",
+    "has",
+    "had",
+    "in",
+    "on",
+    "at",
+    "to",
+    "of",
+    "it",
+    "as",
+    "be",
+    "by",
+    "or",
+    "not",
+    "but",
+    "from",
+    "they",
+    "we",
+    "you",
+    "he",
+    "she",
+    "i",
+    "an",
+    "will",
+    "would",
+}
+
 try:
-    import nltk
-    from nltk.corpus import stopwords
     from nltk.stem import PorterStemmer
 
-    nltk.download("stopwords", quiet=True)
     _stemmer = PorterStemmer()
-    _stop_words = set(stopwords.words("english"))
-    HAS_NLTK = True
+    HAS_STEMMER = True
 except Exception:
-    HAS_NLTK = False
     _stemmer = None
-    _stop_words = set()
+    HAS_STEMMER = False
+
+# Use sklearn's built-in english stopwords as primary, fallback to minimal set
+try:
+    from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+
+    _stop_words = set(ENGLISH_STOP_WORDS) | _FALLBACK_STOP_WORDS
+except Exception:
+    _stop_words = _FALLBACK_STOP_WORDS
 
 
 def clean_text(text: str) -> str:
     """Mirrors app.py clean_text — HTML strip, lower, alpha-only, stop+stem."""
     text = re.sub(r"<[^>]+>", " ", text).lower()
     text = re.sub(r"[^a-zA-Z\s]", "", text)
-    if HAS_NLTK and _stemmer is not None:
+    if HAS_STEMMER and _stemmer is not None:
         tokens = [_stemmer.stem(t) for t in text.split() if t not in _stop_words and len(t) > 2]
     else:
-        tokens = [t for t in text.split() if len(t) > 2]
+        tokens = [t for t in text.split() if t not in _stop_words and len(t) > 2]
     return " ".join(tokens)
 
 
